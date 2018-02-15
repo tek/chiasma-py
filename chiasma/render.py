@@ -4,12 +4,12 @@ from amino.tc.context import context, Bindings
 from amino import do, Do
 
 from chiasma.window.main import pack_window, find_or_create_window, ensure_window, ensure_view, window_state
-from chiasma.io.tc import TS
 from chiasma.data.tmux import TmuxData
 from chiasma.util.id import Ident
 from chiasma.data.view_tree import ViewTree
 from chiasma.session import find_or_create_session, ensure_session
 from chiasma.window.principal import principal
+from chiasma.io.state import TS
 
 LO = TypeVar('LO')
 P = TypeVar('P')

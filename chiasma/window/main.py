@@ -9,7 +9,6 @@ from amino.tc.context import context, Bindings
 from chiasma.data.tmux import TmuxData
 from chiasma.data.window import Window
 from chiasma.util.id import Ident
-from chiasma.io.tc import TS
 from chiasma.commands.window import WindowData, create_window, session_window, window
 from chiasma.data.session import Session
 from chiasma.data.view_tree import LayoutNode, ViewTree, PaneNode, layout_panes, find_pane
@@ -20,6 +19,7 @@ from chiasma.pane import (find_or_create_pane, ensure_pane_open, pack_pane, pane
 from chiasma.commands.pane import pane_from_data, resize_pane, PaneData, window_panes
 from chiasma.window.measure import MeasuredLayoutNode, MeasuredPaneNode, measure_view_tree
 from chiasma.data.pane import Pane
+from chiasma.io.state import TS
 
 log = module_log()
 A = TypeVar('A')

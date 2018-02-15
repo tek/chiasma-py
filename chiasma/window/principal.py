@@ -2,10 +2,8 @@ from typing import TypeVar, Tuple
 
 from amino.dispatch import PatMat
 from amino import Maybe, Just, Either, do, Do, __
-from amino.state import State
 
 from chiasma.data.view_tree import ViewTree, LayoutNode, PaneNode
-from chiasma.io.tc import TS
 from chiasma.data.tmux import TmuxData
 from chiasma.commands.pane import PaneData, window_panes
 from chiasma.util.id import Ident
@@ -13,6 +11,7 @@ from chiasma.data.pane import Pane
 from chiasma.data.session import Session
 from chiasma.commands.window import WindowData
 from chiasma.pane import add_pane
+from chiasma.io.state import TS
 
 L = TypeVar('L')
 P = TypeVar('P')

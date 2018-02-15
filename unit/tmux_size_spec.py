@@ -10,12 +10,12 @@ from chiasma.data.tmux import TmuxData
 from chiasma.data.session import Session
 from chiasma.data.window import Window
 from chiasma.commands.pane import PaneData, all_panes
-from chiasma.io.tc import TS
 from chiasma.data.view_tree import ViewTree, map_nodes
 from chiasma.ui.view_geometry import ViewGeometry
 from chiasma.ui.simple import Layout as SimpleLayout, Pane as SimplePane
 from chiasma.render import render
 from chiasma.test.tmux_spec import TmuxSpec
+from chiasma.io.state import TS
 
 A = TypeVar('A')
 B = TypeVar('B')

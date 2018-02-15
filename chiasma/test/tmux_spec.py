@@ -6,7 +6,7 @@ from chiasma.test.terminal import start_tmux
 from chiasma.io.compute import TmuxIO
 from chiasma.commands.server import kill_server
 from chiasma.tmux import Tmux
-from chiasma.io.tc import TS
+from chiasma.io.state import TS
 
 D = TypeVar('D')
 

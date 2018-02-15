@@ -7,12 +7,12 @@ from amino.boolean import false
 from chiasma.data.tmux import TmuxData
 from chiasma.data.pane import Pane
 from chiasma.util.id import Ident
-from chiasma.io.tc import TS
 from chiasma.commands.pane import PaneData, create_pane_from_data, pane_open, move_pane
 from chiasma.data.window import Window
 from chiasma.io.compute import TmuxIO
 from chiasma.window.measure import MeasuredLayoutNode
 from chiasma.data.view_tree import layout_panes
+from chiasma.io.state import TS
 
 D = TypeVar('D')
 P = TypeVar('P')
