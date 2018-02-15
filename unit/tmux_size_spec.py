@@ -2,25 +2,20 @@ from typing import TypeVar
 
 from kallikrein import k, Expectation
 
-from amino.test.spec import SpecBase
 from amino import List, do, Do, __, Dat, _, Boolean
 from amino.lenses.lens import lens
 from amino.boolean import true, false
 
-from chiasma.tmux import Tmux
-from chiasma.io.compute import TmuxIO
 from chiasma.data.tmux import TmuxData
 from chiasma.data.session import Session
 from chiasma.data.window import Window
 from chiasma.commands.pane import PaneData, all_panes
-from chiasma.commands.server import kill_server
 from chiasma.io.tc import TS
 from chiasma.data.view_tree import ViewTree, map_nodes
 from chiasma.ui.view_geometry import ViewGeometry
 from chiasma.ui.simple import Layout as SimpleLayout, Pane as SimplePane
 from chiasma.render import render
-
-from unit._support.tmux import start_tmux
+from chiasma.test.tmux_spec import TmuxSpec
 
 A = TypeVar('A')
 B = TypeVar('B')
@@ -54,33 +49,6 @@ def open_pane(name: str) -> Do:
     layout = yield TS.inspect(_.layout)
     yield render(P=SimplePane, L=SimpleLayout)('main', 'main', layout).transform_s_lens(lens.tmux)
     yield TS.write('display-panes')
-
-
-class TmuxSpec(SpecBase):
-
-    def __init__(self) -> None:
-        self.win_width = 300
-        self.win_height = 120
-
-    def setup(self) -> None:
-        self.socket = 'op'
-        self.proc = start_tmux(self.socket, self.win_width, self.win_height, True)
-        self.tmux = Tmux.cons(self.socket)
-        self._wait(1)
-        cmd = TmuxIO.read('list-clients -F "#{client_name}"')
-        self.client = cmd.unsafe(self.tmux).head.get_or_fail('no clients')
-
-    def teardown(self) -> None:
-        self.proc.kill()
-        self.proc.wait()
-        kill_server().result(self.tmux)
-
-    def run(self, prog: TS[SpecData, None], data: SpecData) -> None:
-        self._wait(1)
-        r = prog.run(data).unsafe(self.tmux)
-        TmuxIO.write('display-panes', '-t', self.client).result(self.tmux)
-        self._wait(1)
-        return r
 
 
 class LayoutSpec(TmuxSpec):
