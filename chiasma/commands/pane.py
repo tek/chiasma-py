@@ -133,11 +133,11 @@ def capture_pane(id: int) -> Do:
     yield TmuxIO.pure(output.reversed.drop_while(_ == '').reversed)
 
 
-pipe_filter = 'sed -u -e \'s/\r//g\' -e \'s/\x1b\[[0-9;?]*[mlK]//g\''
+pipe_filter = """sed -u -e 's/\x1b\[[0-9\;?]*[mlK]//g' | sed -u -e 's/\r//g'"""
 
 
 def pipe_pane(id: int, path: Path) -> TmuxIO[None]:
-    return TmuxIO.write(pane_cmd(id, 'pipe-pane', f'{pipe_filter} > {str(path)}'))
+    return TmuxIO.write(*pane_cmd(id, 'pipe-pane', quote(f'{pipe_filter} > {str(path)}')))
 
 
 __all__ = ('all_panes', 'window_panes', 'pane', 'resize_pane', 'pane_open', 'create_pane_from_data', 'move_pane',
