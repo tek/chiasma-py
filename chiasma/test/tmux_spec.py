@@ -9,6 +9,7 @@ from chiasma.tmux import Tmux
 from chiasma.io.state import TS
 
 D = TypeVar('D')
+tmux_spec_socket = 'tmux_spec'
 
 
 class TmuxSpec(SpecBase):
@@ -18,9 +19,8 @@ class TmuxSpec(SpecBase):
         self.win_height = 120
 
     def setup(self) -> None:
-        self.socket = 'op'
-        self.proc = start_tmux(self.socket, self.win_width, self.win_height, True)
-        self.tmux = Tmux.cons(self.socket)
+        self.proc = start_tmux(tmux_spec_socket, self.win_width, self.win_height, True)
+        self.tmux = Tmux.cons(tmux_spec_socket)
         self._wait(1)
         cmd = TmuxIO.read('list-clients -F "#{client_name}"')
         self.client = cmd.unsafe(self.tmux).head.get_or_fail('no clients')
@@ -38,4 +38,4 @@ class TmuxSpec(SpecBase):
         return r
 
 
-__all__ = ('TmuxSpec',)
+__all__ = ('TmuxSpec', 'tmux_spec_socket')
