@@ -11,11 +11,11 @@ from chiasma.data.window import Window
 from chiasma.util.id import Ident
 from chiasma.commands.window import WindowData, create_window, session_window, window
 from chiasma.data.session import Session
-from chiasma.data.view_tree import LayoutNode, ViewTree, PaneNode, layout_panes, find_pane
+from chiasma.data.view_tree import LayoutNode, ViewTree, PaneNode, layout_panes, find_pane, SubUiNode
 from chiasma.window.principal import principal, sync_principal
 from chiasma.io.compute import TmuxIO
 from chiasma.pane import (find_or_create_pane, ensure_pane_open, pack_pane, pane_by_ident, pane_id_fatal,
-                          reference_pane, pane_by_id)
+                          reference_pane, pane_by_id, ensure_pane_closed)
 from chiasma.commands.pane import pane_from_data, resize_pane, PaneData, window_panes
 from chiasma.window.measure import MeasuredLayoutNode, MeasuredPaneNode, measure_view_tree
 from chiasma.data.pane import Pane
@@ -65,7 +65,7 @@ def ensure_window(session: Session, window: Window, ui_window: Ident, layout: Vi
             __.map(Right) |
             (lambda: TS.pure(Left('window not open')))
         )
-    win = yield (existing() / sync).value
+    win = yield (existing() / sync).value_or(TS.error)
     yield win / TS.pure | (lambda: create_tmux_window(session, window, ui_window))
     yield TS.unit
 
@@ -88,7 +88,11 @@ class ensure_view(PatMat, alg=ViewTree):
         pane = node.data
         tpane = yield find_or_create_pane(node.data.ident).tmux
         pane1 = yield TS.lift(pane_from_data(self.window, tpane))
-        yield ensure_pane_open(self.window, tpane, pane1) if pane.open else TS.pure(None)
+        yield (
+            ensure_pane_open(self.window, tpane, pane1)
+            if pane.open else
+            ensure_pane_closed(self.window, tpane, pane1)
+        )
 
     def sub_ui_node(self, node: SubUiNode[L, P]) -> TS[TmuxData, None]:
         return TS.unit
