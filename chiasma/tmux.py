@@ -52,7 +52,7 @@ class TmuxCmdSuccess(TmuxCmdResult):
 class TmuxCmdError(TmuxCmdResult):
 
     def __init__(self, cmd: TmuxCmd, output: PError) -> None:
-        self.cmds = cmd
+        self.cmd = cmd
         self.output = output
 
 
