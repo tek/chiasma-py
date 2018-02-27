@@ -11,7 +11,7 @@ from amino.dat import ADT, ADTMeta
 
 from chiasma.tmux import Tmux, TmuxCmd, TmuxCmdResult, TmuxCmdSuccess, TmuxCmdError
 from chiasma.io.data import TSuccess, TError, TFatal, TResult
-from chiasma.io.trace import TmuxIOException, callsite_source
+from chiasma.io.trace import TmuxIOException
 
 A = TypeVar('A')
 B = TypeVar('B')
@@ -170,10 +170,6 @@ class TmuxIO(Generic[A], F[A], ADT['TmuxIO'], implicits=True, auto=True, metacla
 
     def error_effect_f(self, f: Callable[[Exception], 'TmuxIO[None]']) -> 'TmuxIO[A]':
         return self.ensure(lambda a: TmuxIO.suspend(lambda v: a.cata(f, TmuxIO.pure)))
-
-    @property
-    def callsite_l1(self) -> str:
-        return callsite_source(self.frame)[0][0]
 
 
 class Suspend(Generic[A], TmuxIO[A]):

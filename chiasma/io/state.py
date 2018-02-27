@@ -5,9 +5,9 @@ from amino import Either, IO, Maybe
 from amino.state import tcs, StateT, State, EitherState
 from amino.func import CallByName
 from amino.tc.base import TypeClass, tc_prop
+from amino.util.trace import cframe
 
 from chiasma.io.compute import TmuxIO
-from chiasma.io.trace import cframe
 from chiasma.tmux import Tmux
 from chiasma.io.tc import TmuxIOMonad  # noqa
 
