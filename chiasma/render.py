@@ -17,14 +17,14 @@ P = TypeVar('P')
 
 @context(**pack_window.bounds)
 @do(TS[TmuxData, None])
-def render(bindings: Bindings, session: Ident, ui_window: Ident, layout: ViewTree[LO, P]) -> Do:
-    session = yield find_or_create_session(session).tmux
-    window = yield find_or_create_window(ui_window).tmux
+def render(bindings: Bindings, session_ident: Ident, window_ident: Ident, layout: ViewTree[LO, P]) -> Do:
+    session = yield find_or_create_session(session_ident).tmux
+    window = yield find_or_create_window(window_ident).tmux
     yield TS.lift(ensure_session(session))
-    yield ensure_window(session, window, ui_window, layout)
+    yield ensure_window(session, window, window_ident, layout)
     yield ensure_view(session, window)(layout)
     ui_princ, t_princ = yield principal(layout)
-    ws = yield window_state(ui_window, window, layout)
+    ws = yield window_state(window_ident, window, layout)
     yield pack_window(bindings)(session, window, ui_princ)(ws)
 
 
