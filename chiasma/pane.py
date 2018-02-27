@@ -7,7 +7,7 @@ from amino.boolean import false
 from chiasma.data.tmux import TmuxData
 from chiasma.data.pane import Pane
 from chiasma.util.id import Ident
-from chiasma.commands.pane import PaneData, create_pane_from_data, pane_open, move_pane
+from chiasma.commands.pane import PaneData, create_pane_from_data, pane_open, move_pane, close_pane
 from chiasma.data.window import Window
 from chiasma.io.compute import TmuxIO
 from chiasma.window.measure import MeasuredLayoutNode
@@ -41,6 +41,11 @@ def create_tmux_pane(window: Window, pane: Pane) -> Do:
 @do(TS[TmuxData, PaneData])
 def ensure_pane_open(window: Window, pane: Pane, npane: Either[str, PaneData]) -> Do:
     yield npane / TS.pure | (lambda: create_tmux_pane(window, pane))
+
+
+@do(TS[TmuxData, PaneData])
+def ensure_pane_closed(window: Window, pane: Pane, npane: Either[str, PaneData]) -> Do:
+    yield npane / close_pane / TS.lift | TS.unit
 
 
 def pane_id_fatal(pane: Pane) -> TS[D, str]:
