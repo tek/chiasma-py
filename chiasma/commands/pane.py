@@ -1,4 +1,4 @@
-from amino import List, Either, Regex, do, Do, Dat, Right, Try, Left, _, Boolean
+from amino import List, Either, Regex, do, Do, Dat, Right, Try, Left, Boolean, L, Lists, _, Path
 from amino.util.numeric import parse_int
 
 from chiasma.io.compute import TmuxIO
@@ -16,6 +16,10 @@ def parse_pane_id(pane_id: str) -> Do:
     match = yield pane_id_re.match(pane_id)
     id_s = yield match.group('id')
     yield parse_int(id_s)
+
+
+def pane_id(id: int) -> str:
+    return f'%{id}'
 
 
 class PaneData(Dat['PaneData']):
@@ -47,6 +51,10 @@ def parse_pane_data(output: List[str]) -> Either[str, List[PaneData]]:
     return output.traverse(lambda kw: Try(PaneData.from_tmux, **kw).join, Either)
 
 
+def pane_cmd(id: int, cmd: str, *args: str) -> List[str]:
+    return List(cmd, '-t', pane_id(id)) + Lists.wrap(args)
+
+
 cmd_data_pane = TmuxCmdData.from_cons(PaneData.from_tmux)
 
 
@@ -58,8 +66,10 @@ def window_panes(wid: int) -> TmuxIO[List[PaneData]]:
     return tmux_data_cmd('list-panes', List('-t', window_id(wid)), cmd_data_pane)
 
 
-def pane(session_id: str, window_id: str, pane_id: str) -> Do:
-    pass
+@do(TmuxIO[PaneData])
+def pane(wid: int, pane_id: int) -> Do:
+    panes = yield tmux_data_cmd('list-panes', List('-t', window_id(wid)), cmd_data_pane)
+    yield TmuxIO.from_maybe(panes.find(_.id == pane_id), f'no pane with id `{pane_id}`')
 
 
 @do(Either[str, PaneLoc])
@@ -95,12 +105,40 @@ def pane_open(id: int) -> Do:
 
 def resize_pane(id: int, vertical: Boolean, size: int) -> TmuxIO[None]:
     direction = '-y' if vertical else '-x'
-    return TmuxIO.write('resize-pane', '-t', id, direction, size)
+    return TmuxIO.write('resize-pane', '-t', pane_id(id), direction, size)
 
 
 def move_pane(id: int, ref_id: int, vertical: Boolean) -> TmuxIO[None]:
     direction = '-v' if vertical else '-h'
-    return TmuxIO.write('move-pane', '-s', id, '-t', ref_id, direction)
+    return TmuxIO.write('move-pane', '-s', pane_id(id), '-t', pane_id(ref_id), direction)
 
 
-__all__ = ('all_panes', 'window_panes', 'pane', 'resize_pane', 'pane_open', 'create_pane_from_data', 'move_pane')
+def close_pane(pane: PaneData) -> TmuxIO[None]:
+    return TmuxIO.write('kill-pane', '-t', pane.id)
+
+
+def quote(data: str) -> str:
+    escaped = data.replace("'", "\\'")
+    return f"'{escaped}'"
+
+
+def send_keys(id: int, lines: List[str]) -> TmuxIO[None]:
+    with_crs = lines.map(quote).flat_map(L(List)(_, 'enter'))
+    return with_crs.traverse(L(TmuxIO.write)('send-keys', '-t', pane_id(id), _), TmuxIO)
+
+
+@do(TmuxIO[str])
+def capture_pane(id: int) -> Do:
+    output = yield TmuxIO.read(*pane_cmd(id, 'capture-pane', '-p'))
+    yield TmuxIO.pure(output.reversed.drop_while(_ == '').reversed)
+
+
+pipe_filter = 'sed -u -e \'s/\r//g\' -e \'s/\x1b\[[0-9;?]*[mlK]//g\''
+
+
+def pipe_pane(id: int, path: Path) -> TmuxIO[None]:
+    return TmuxIO.write(pane_cmd(id, 'pipe-pane', f'{pipe_filter} > {str(path)}'))
+
+
+__all__ = ('all_panes', 'window_panes', 'pane', 'resize_pane', 'pane_open', 'create_pane_from_data', 'move_pane',
+           'close_pane', 'send_keys', 'capture_pane')
