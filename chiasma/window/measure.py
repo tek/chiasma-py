@@ -3,11 +3,11 @@ from typing import Callable, Generic, TypeVar
 import operator
 
 from amino.dispatch import PatMat
-from amino import Either, Dat, _, List, Boolean, Maybe, Nil, Just, __, I
+from amino import Either, Dat, _, List, Boolean, Maybe, Nil, Just, __, I, Left
 from amino.logging import module_log
 from amino.tc.context import context, Bindings
 
-from chiasma.data.view_tree import ViewTree, LayoutNode, PaneNode
+from chiasma.data.view_tree import ViewTree, LayoutNode, PaneNode, SubUiNode
 from chiasma.ui.view import UiPane, UiLayout, UiView
 from chiasma.ui.view_geometry import ViewGeometry
 from chiasma.ui.state import ViewState
@@ -59,6 +59,9 @@ class is_view_open(PatMat, alg=ViewTree):
     def layout_node(self, node: LayoutNode[A, P]) -> Either[str, P]:
         return node.sub.exists(self)
 
+    def sub_ui_node(self, node: SubUiNode[L, P]) -> Either[str, P]:
+        return Left('SubUiNode')
+
 
 @context(P=UiPane)
 def open_views(bindings: Bindings, node: LayoutNode[A, P]) -> List[ViewTree[A, P]]:
@@ -104,6 +107,9 @@ class measure_layout(PatMat, alg=ViewTree):
             Nil
         )
         return ViewTree.layout(MeasuredView(node.data, self.measures), sub)
+
+    def sub_ui_node(self, node: SubUiNode[L, P]) -> Either[str, P]:
+        return ViewTree.pane(MeasuredView(node.data, self.measures))
 
 
 @context(P=UiPane, L=UiLayout)

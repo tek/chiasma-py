@@ -1,9 +1,9 @@
 from typing import TypeVar, Tuple
 
 from amino.dispatch import PatMat
-from amino import Maybe, Just, Either, do, Do, __
+from amino import Maybe, Just, Either, do, Do, __, Nothing
 
-from chiasma.data.view_tree import ViewTree, LayoutNode, PaneNode
+from chiasma.data.view_tree import ViewTree, LayoutNode, PaneNode, SubUiNode
 from chiasma.data.tmux import TmuxData
 from chiasma.commands.pane import PaneData, window_panes
 from chiasma.util.id import Ident
@@ -24,6 +24,9 @@ class FindPrincipal(PatMat, alg=ViewTree):
 
     def pane_node(self, node: PaneNode[L, P]) -> Maybe[P]:
         return Just(node.data)
+
+    def sub_ui_node(self, node: SubUiNode[L, P]) -> Maybe[P]:
+        return Nothing
 
 
 def find_principal(layout: LayoutNode) -> Either[str, P]:

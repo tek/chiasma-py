@@ -10,7 +10,7 @@ from chiasma.data.tmux import TmuxData
 from chiasma.data.session import Session
 from chiasma.data.window import Window
 from chiasma.commands.pane import PaneData, all_panes
-from chiasma.data.view_tree import ViewTree, map_nodes
+from chiasma.data.view_tree import ViewTree, map_panes
 from chiasma.ui.view_geometry import ViewGeometry
 from chiasma.ui.simple import Layout as SimpleLayout, Pane as SimplePane
 from chiasma.render import render
@@ -39,7 +39,7 @@ class SpecData(Dat['SpecData']):
 @do(TS[SpecData, None])
 def ui_open_pane(name: str) -> Do:
     layout = yield TS.inspect(_.layout)
-    updated = yield TS.from_either(map_nodes(lambda a: Boolean(a.data.ident == name), lens.data.open.set(true))(layout))
+    updated = map_panes(P=SimplePane)(lambda a: Boolean(a.ident == name), lens.open.set(true))(layout)
     yield TS.modify(__.set.layout(updated))
 
 
@@ -80,7 +80,7 @@ class LayoutSpec(TmuxSpec):
             yield open_pane('three')
             yield all_panes().state
         s, panes = self.run(go(), data)
-        target = List(PaneData(0, 301, 44, 0), PaneData(2, 150, 45, 45), PaneData(1, 150, 45, 45))
+        target = List(PaneData(0, 301, 44, 0), PaneData(1, 150, 45, 45), PaneData(2, 150, 45, 45))
         return k(panes) == target
 
     def two_sub(self) -> Expectation:
@@ -113,10 +113,10 @@ class LayoutSpec(TmuxSpec):
             yield all_panes().state
         s, panes = self.run(go(), data)
         target = List(
-            PaneData(0, 150, 11, 0),
-            PaneData(2, 150, 11, 0),
-            PaneData(3, 150, 78, 12),
-            PaneData(1, 150, 78, 12),
+            PaneData(0, 150, 5, 0),
+            PaneData(1, 150, 5, 0),
+            PaneData(2, 150, 84, 6),
+            PaneData(3, 150, 84, 6),
         )
         return k(panes) == target
 
@@ -158,10 +158,10 @@ class LayoutSpec(TmuxSpec):
         s, panes = self.run(go(), data)
         target = List(
             PaneData(0, 301, 59, 0),
-            PaneData(4, 150, 30, 60),
-            PaneData(3, 150, 2, 60),
-            PaneData(2, 75, 27, 63),
-            PaneData(1, 74, 27, 63),
+            PaneData(1, 150, 2, 60),
+            PaneData(2, 150, 2, 60),
+            PaneData(3, 226, 27, 63),
+            PaneData(4, 74, 27, 63),
         )
         return k(panes) == target
 
@@ -187,7 +187,7 @@ class DistributeSizeSpec(TmuxSpec):
             yield open_pane('three')
             yield all_panes().state
         s, panes = self.run(go(), data)
-        return k(panes / _.position) == List(0, 30, 61)
+        return k(panes / _.position) == List(0, 30, 60)
 
 
 __all__ = ('LayoutSpec', 'DistributeSizeSpec')

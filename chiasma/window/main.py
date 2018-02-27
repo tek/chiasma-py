@@ -90,6 +90,9 @@ class ensure_view(PatMat, alg=ViewTree):
         pane1 = yield TS.lift(pane_from_data(self.window, tpane))
         yield ensure_pane_open(self.window, tpane, pane1) if pane.open else TS.pure(None)
 
+    def sub_ui_node(self, node: SubUiNode[L, P]) -> TS[TmuxData, None]:
+        return TS.unit
+
 
 class position_view(PatMat, alg=ViewTree):
 
@@ -106,6 +109,9 @@ class position_view(PatMat, alg=ViewTree):
     def pane_node(self, node: MeasuredPaneNode) -> Do:
         yield pack_pane(node.data.view, self.reference, self.vertical)
         yield TS.unit
+
+    def sub_ui_node(self, node: SubUiNode[L, P]) -> TS[TmuxData, None]:
+        return TS.unit
 
 
 class resize_view(PatMat, alg=ViewTree):
@@ -126,6 +132,9 @@ class resize_view(PatMat, alg=ViewTree):
         id = yield pane_id_fatal(tpane)
         log.debug(f'resize {mp.view} to {size} ({self.vertical})')
         yield TS.lift(resize_pane(id, self.vertical, size))
+
+    def sub_ui_node(self, node: SubUiNode[L, P]) -> TS[TmuxData, None]:
+        return TS.unit
 
 
 # TODO sort views by `position` attr before positioning
@@ -149,6 +158,9 @@ class pack_tree(PatMat, alg=ViewTree):
     @do(TS[TmuxData, None])
     def pane_node(self, node: PaneNode, reference: P) -> Do:
         yield TS.unit
+
+    def sub_ui_node(self, node: SubUiNode[L, P], reference: P) -> TS[TmuxData, None]:
+        return TS.unit
 
 
 class WindowState(ADT['WindowState']):
