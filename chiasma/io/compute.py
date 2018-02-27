@@ -356,7 +356,7 @@ def execute_read(writes: List[TmuxCmd], read: TmuxCmd) -> Do:
 @do(TmuxIO[Either[List[str], List[str]]])
 def execute_writes(writes: List[TmuxCmd]) -> Do:
     results = yield execute_cmds(writes, Nothing)
-    yield TmuxIO.from_either(results.last.map(read_result) | L(Right)(Nil))
+    yield TmuxIO.from_either(results.traverse(read_result, Either).map(lambda a: a.last | Nil))
 
 
 def execute_write(write: TmuxCmd) -> TmuxIO[Either[List[str], List[str]]]:
