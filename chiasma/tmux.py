@@ -1,7 +1,7 @@
 import abc
 from subprocess import Popen, PIPE
 
-from amino import List, Lists, Map, Boolean, do, Either, Do, _, __, Try, Dat, ADT, Nil
+from amino import List, Lists, Map, Boolean, do, Either, Do, _, __, Try, Dat, ADT, Nil, Maybe
 from amino.boolean import false, true
 from amino.string.hues import blue, red
 
@@ -116,7 +116,7 @@ class Tmux(Logging, abc.ABC):
 
     @staticmethod
     def cons(socket: str=None) -> 'Tmux':
-        return NativeTmux(socket)
+        return NativeTmux(Maybe.optional(socket))
 
     @abc.abstractmethod
     def execute_cmds(self, cmds: List[TmuxCmd]) -> List[TmuxCmdResult]:
@@ -125,11 +125,12 @@ class Tmux(Logging, abc.ABC):
 
 class NativeTmux(Tmux):
 
-    def __init__(self, socket: str) -> None:
+    def __init__(self, socket: Maybe[str]) -> None:
         self.socket = socket
 
     def execute_cmds(self, cmds: List[TmuxCmd]) -> List[TmuxCmdResult]:
-        proc = Popen(args=['tmux', '-L', self.socket, '-C', 'attach'], stdin=PIPE, stdout=PIPE, stderr=PIPE,
+        socket_args = self.socket / (lambda a: ['-L', a]) | []
+        proc = Popen(args=['tmux'] + socket_args + ['-C', 'attach'], stdin=PIPE, stdout=PIPE, stderr=PIPE,
                      universal_newlines=True)
         cmdlines = (cmds / _.cmdline).cat('').join_lines
         stdout, stderr = proc.communicate(cmdlines)
