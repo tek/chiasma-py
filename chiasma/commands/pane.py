@@ -91,8 +91,14 @@ def window_panes(wid: int) -> TmuxIO[List[PaneData]]:
 
 
 @do(TmuxIO[PaneData])
-def pane(wid: int, pane_id: int) -> Do:
-    panes = yield tmux_data_cmd('list-panes', List('-t', window_id(wid)), cmd_data_pane)
+def window_pane(wid: int, pane_id: int) -> Do:
+    panes = yield window_panes(wid)
+    yield TmuxIO.from_maybe(panes.find(_.id == pane_id), f'no pane with id `{pane_id}`')
+
+
+@do(TmuxIO[PaneData])
+def pane(pane_id: int) -> Do:
+    panes = yield all_panes()
     yield TmuxIO.from_maybe(panes.find(_.id == pane_id), f'no pane with id `{pane_id}`')
 
 
@@ -138,7 +144,7 @@ def move_pane(id: int, ref_id: int, vertical: Boolean) -> TmuxIO[None]:
 
 
 def close_pane(pane: PaneData) -> TmuxIO[None]:
-    return TmuxIO.write('kill-pane', '-t', pane.id)
+    return TmuxIO.write(*pane_cmd(pane.id, 'kill-pane'))
 
 
 def quote(data: str) -> str:
@@ -165,4 +171,4 @@ def pipe_pane(id: int, path: Path) -> TmuxIO[None]:
 
 
 __all__ = ('all_panes', 'window_panes', 'pane', 'resize_pane', 'pane_open', 'create_pane_from_data', 'move_pane',
-           'close_pane', 'send_keys', 'capture_pane')
+           'close_pane', 'send_keys', 'capture_pane', 'window_pane')
