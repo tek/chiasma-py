@@ -5,7 +5,8 @@ from chiasma.io.compute import TmuxIO
 from chiasma.command import tmux_data_cmd, TmuxCmdData
 from chiasma.data.window import Window
 from chiasma.data.pane import Pane
-from chiasma.commands.window import window_id
+from chiasma.commands.window import window_id, parse_window_id
+from chiasma.commands.session import parse_session_id
 
 
 pane_id_re = Regex('^%(?P<id>\d+)$')
@@ -26,18 +27,41 @@ class PaneData(Dat['PaneData']):
 
     @staticmethod
     @do(Either[str, 'PaneData'])
-    def from_tmux(pane_id: str, pane_width: str, pane_height: str, pane_top: str) -> Do:
+    def from_tmux(
+            pane_id: str,
+            pane_width: str,
+            pane_height: str,
+            pane_top: str,
+            pane_pid: str,
+            window_id: str,
+            session_id: str,
+    ) -> Do:
         id = yield parse_pane_id(pane_id)
         width = yield parse_int(pane_width)
         height = yield parse_int(pane_height)
         top = yield parse_int(pane_top)
-        yield Right(PaneData(id, width, height, top))
+        pid = yield parse_int(pane_pid)
+        wid = yield parse_window_id(window_id)
+        sid = yield parse_session_id(session_id)
+        yield Right(PaneData(id, width, height, top, pid, wid, sid))
 
-    def __init__(self, id: int, width: int, height: int, position: int) -> None:
+    def __init__(
+            self,
+            id: int,
+            width: int,
+            height: int,
+            position: int,
+            pid: int,
+            window_id: int,
+            session_id: int,
+    ) -> None:
         self.id = id
         self.width = width
         self.height = height
         self.position = position
+        self.pid = pid
+        self.window_id = window_id
+        self.session_id = session_id
 
 
 class PaneLoc(Dat['PaneLoc']):
