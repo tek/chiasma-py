@@ -39,7 +39,7 @@ cmd_data_window = TmuxCmdData.from_cons(WindowData.from_tmux)
 
 
 def windows() -> TmuxIO[List[WindowData]]:
-    return tmux_data_cmd('list-windows', Nil, cmd_data_window)
+    return tmux_data_cmd('list-windows', List('-a'), cmd_data_window)
 
 
 @do(TmuxIO[Either[str, WindowData]])
