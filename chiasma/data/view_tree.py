@@ -1,6 +1,6 @@
 from typing import Generic, TypeVar, Callable, Any
 
-from amino import ADT, List, Nil, Either, Right, Left, Boolean, Maybe, Nothing, __
+from amino import ADT, List, Nil, Either, Right, Left, Boolean, Maybe, Nothing, __, _
 
 from chiasma.ui.view import UiPane
 from amino.dispatch import PatMat
@@ -38,6 +38,9 @@ class LayoutNode(Generic[A, B], ViewTree[A, B]):
     def __init__(self, data: A, sub: List[ViewTree[A, B]]) -> None:
         self.data = data
         self.sub = sub
+
+        def replace_sub(node: ViewTree[A, B]) -> LayoutNode[A, B]:
+            return self.mod.sub(__.replace_where(node, _.data == node.data))
 
 
 class SubUiNode(Generic[A, B], ViewTree[A, B]):
