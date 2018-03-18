@@ -18,8 +18,11 @@ class TmuxSpec(SpecBase):
         self.win_width = 300
         self.win_height = 120
 
+    def tmux_in_terminal(self) -> bool:
+        return True
+
     def setup(self) -> None:
-        self.tmux_proc = start_tmux(tmux_spec_socket, self.win_width, self.win_height, True)
+        self.tmux_proc = start_tmux(tmux_spec_socket, self.win_width, self.win_height, self.tmux_in_terminal())
         self.tmux = Tmux.cons(tmux_spec_socket)
         self._wait(1)
         cmd = TmuxIO.read('list-clients -F "#{client_name}"')
