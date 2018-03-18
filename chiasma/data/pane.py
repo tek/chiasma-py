@@ -7,19 +7,16 @@ class Pane(Dat['Pane']):
 
     @staticmethod
     def cons(
-            pane: Ident,
-            name: str=None,
+            ident: Ident,
             id: str=None,
     ) -> 'Pane':
         return Pane(
-            pane,
-            name or pane,
+            ident,
             Maybe.check(id),
         )
 
-    def __init__(self, pane: Ident, name: str, id: Maybe[str]) -> None:
-        self.pane = pane
-        self.name = name
+    def __init__(self, ident: Ident, id: Maybe[str]) -> None:
+        self.ident = ident
         self.id = id
 
 __all__ = ('Pane',)

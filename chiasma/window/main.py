@@ -223,7 +223,7 @@ class pack_window(PatMat, alg=WindowState):
 
     @do(TS[TmuxData, None])
     def tracked_window(self, win: TrackedWindow) -> Do:
-        ref = yield TS.from_either(find_pane(win.pane.pane)(win.layout))
+        ref = yield TS.from_either(find_pane(win.pane.ident)(win.layout))
         width, height = int(win.native_window.width), int(win.native_window.height)
         measure_tree = measure_view_tree(self.bindings)(win.layout, width, height)
         yield pack_tree(self.session, self.window, self.principal)(measure_tree, ref)

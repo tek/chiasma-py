@@ -1,5 +1,3 @@
-from uuid import uuid4
-
 from amino import Dat, List, Nil, ADT
 
 from chiasma.util.id import Ident
@@ -14,17 +12,17 @@ class Layout(Dat['Layout']):
 
     @staticmethod
     def cons(
+        ident: Ident,
         views: List[View]=Nil,
-        ident: Ident=None,
     ) -> 'Layout':
         return Layout(
+            ident,
             views,
-            ident or uuid4(),
         )
 
-    def __init__(self, views: List[View], ident: Ident) -> None:
-        self.views = views
+    def __init__(self, ident: Ident, views: List[View]) -> None:
         self.ident = ident
+        self.views = views
 
     def add(self, view: View) -> 'Layout':
         return self.append1.views(view)

@@ -39,11 +39,8 @@ class TmuxData(Dat['TmuxData']):
     def add_pane(self, pane: Pane) -> 'TmuxData':
         return self.append1.panes(pane)
 
-    def pane_by_name(self, name: str) -> Either[str, Pane]:
-        return self.panes.find(_.name == name).to_either(f'no pane named `{name}`')
-
     def update_pane(self, pane: Pane) -> 'TmuxData':
-        return lens.panes.Each().Filter(_.name == pane.name).set(pane)(self)
+        return lens.panes.Each().Filter(_.ident == pane.ident).set(pane)(self)
 
     def set_pane_id(self, pane: Pane, id: str) -> 'TmuxData':
         return self.update_pane(pane.copy(id=Just(id)))
@@ -52,10 +49,10 @@ class TmuxData(Dat['TmuxData']):
         return self.sessions.find(_.ident == ident).to_either(f'no session for `{ident}`')
 
     def window_by_ident(self, ident: Ident) -> Either[str, Window]:
-        return self.windows.find(_.window == ident).to_either(f'no window for `{ident}`')
+        return self.windows.find(_.ident == ident).to_either(f'no window for `{ident}`')
 
     def pane_by_ident(self, ident: Ident) -> Either[str, Pane]:
-        return self.panes.find(_.pane == ident).to_either(lambda: f'no pane for `{ident}`')
+        return self.panes.find(_.ident == ident).to_either(lambda: f'no pane for `{ident}`')
 
 
 __all__ = ('TmuxData',)
