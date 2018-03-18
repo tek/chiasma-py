@@ -1,4 +1,4 @@
-from typing import TypeVar
+from typing import TypeVar, Tuple
 
 from kallikrein import k, Expectation
 
@@ -51,6 +51,10 @@ def open_pane(name: str) -> Do:
     yield TS.write('display-panes')
 
 
+def pane_geo(pane: PaneData) -> Tuple[int, int, int]:
+    return pane.width, pane.height, pane.position
+
+
 class LayoutSpec(TmuxSpec):
     '''
     main layout vertical with one pane, one sublayout horizontal with two panes $one_sub
@@ -80,8 +84,8 @@ class LayoutSpec(TmuxSpec):
             yield open_pane('three')
             yield all_panes().state
         s, panes = self.run(go(), data)
-        target = List(PaneData(0, 301, 44, 0), PaneData(1, 150, 45, 45), PaneData(2, 150, 45, 45))
-        return k(panes) == target
+        target = List((301, 44, 0), (150, 45, 45), (150, 45, 45))
+        return k(panes / pane_geo) == target
 
     def two_sub(self) -> Expectation:
         layout = ViewTree.layout(
@@ -113,12 +117,12 @@ class LayoutSpec(TmuxSpec):
             yield all_panes().state
         s, panes = self.run(go(), data)
         target = List(
-            PaneData(0, 150, 5, 0),
-            PaneData(1, 150, 5, 0),
-            PaneData(2, 150, 84, 6),
-            PaneData(3, 150, 84, 6),
+            (150, 5, 0),
+            (150, 5, 0),
+            (150, 84, 6),
+            (150, 84, 6),
         )
-        return k(panes) == target
+        return k(panes / pane_geo) == target
 
     def four(self) -> Expectation:
         layout = ViewTree.layout(
@@ -157,13 +161,13 @@ class LayoutSpec(TmuxSpec):
             yield all_panes().state
         s, panes = self.run(go(), data)
         target = List(
-            PaneData(0, 301, 59, 0),
-            PaneData(1, 150, 2, 60),
-            PaneData(2, 150, 2, 60),
-            PaneData(3, 226, 27, 63),
-            PaneData(4, 74, 27, 63),
+            (301, 59, 0),
+            (150, 2, 60),
+            (150, 2, 60),
+            (226, 27, 63),
+            (74, 27, 63),
         )
-        return k(panes) == target
+        return k(panes / pane_geo) == target
 
 
 class DistributeSizeSpec(TmuxSpec):
