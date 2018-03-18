@@ -13,19 +13,13 @@ class Layout(Dat['Layout']):
     @staticmethod
     def cons(
         ident: Ident,
-        views: List[View]=Nil,
     ) -> 'Layout':
         return Layout(
             ident,
-            views,
         )
 
     def __init__(self, ident: Ident, views: List[View]) -> None:
         self.ident = ident
-        self.views = views
-
-    def add(self, view: View) -> 'Layout':
-        return self.append1.views(view)
 
 
 class PaneView(View):
