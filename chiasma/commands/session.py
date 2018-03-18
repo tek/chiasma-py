@@ -15,6 +15,10 @@ def parse_session_id(session_id: str) -> Do:
     yield parse_int(id_s)
 
 
+def session_id(id: int) -> str:
+    return f'${id}'
+
+
 class SessionData(Dat['SessionData']):
 
     @staticmethod
@@ -45,4 +49,4 @@ def create_session(name: str) -> Do:
     yield TmuxIO.write('new-session', '-s', name)
 
 
-__all__ = ('sessions', 'session_exists', 'create_session')
+__all__ = ('sessions', 'session_exists', 'create_session', 'session_id')
