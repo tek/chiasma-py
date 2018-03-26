@@ -44,9 +44,10 @@ def session_exists(id: str) -> Do:
     yield Right(ss.exists(_.id == id))
 
 
-@do(TmuxIO[None])
+@do(TmuxIO[SessionData])
 def create_session(name: str) -> Do:
-    yield TmuxIO.write('new-session', '-s', name)
+    sessions = yield tmux_data_cmd('new-session', List('-s', name, '-P'), cmd_data_session)
+    yield TmuxIO.from_maybe(sessions.head, f'no output when creating session `{name}`')
 
 
 __all__ = ('sessions', 'session_exists', 'create_session', 'session_id')

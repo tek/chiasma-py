@@ -2,7 +2,7 @@ from numbers import Number
 from typing import Callable, Generic, TypeVar
 import operator
 
-from amino.dispatch import PatMat
+from amino.case import Case
 from amino import Either, Dat, _, List, Boolean, Maybe, Nil, Just, __, I, Left
 from amino.logging import module_log
 from amino.tc.context import context, Bindings
@@ -51,7 +51,7 @@ def measure_data(v: V) -> ViewMeasureData:
 
 
 @context(P=UiPane)
-class is_view_open(PatMat, alg=ViewTree):
+class is_view_open(Case, alg=ViewTree):
 
     def pane_node(self, node: PaneNode[A, P]) -> Either[str, P]:
         return node.data.open
@@ -79,7 +79,7 @@ def measure_layout_views(views: List[ViewMeasureData], total: Number) -> List[Nu
 
 
 @context(P=UiPane, L=UiLayout)
-class measure_layout(PatMat, alg=ViewTree):
+class measure_layout(Case, alg=ViewTree):
 
     def __init__(self, bindings: Bindings, measures: Measures, width: Number, height: Number) -> None:
         self.bindings = bindings

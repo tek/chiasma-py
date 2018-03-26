@@ -3,7 +3,7 @@ from uuid import uuid4
 from amino import Boolean, ADT
 from amino.tc.base import tc_prop
 
-from chiasma.util.id import Ident
+from chiasma.util.id import Ident, IdentSpec, ensure_ident
 from chiasma.ui.view_geometry import ViewGeometry
 from chiasma.ui.view import UiPane, UiLayout, UiView
 from chiasma.ui.state import ViewState
@@ -21,13 +21,13 @@ class Layout(View):
 
     @staticmethod
     def cons(
-            ident: Ident=None,
+            ident: IdentSpec=None,
             state: ViewState=None,
             geometry: ViewGeometry=None,
             vertical: bool=True,
     ) -> 'Layout':
         return Layout(
-            ident or uuid4(),
+            ensure_ident(ident),
             state or ViewState.cons(),
             geometry or ViewGeometry.cons(),
             Boolean(vertical),
@@ -48,13 +48,13 @@ class Pane(View):
 
     @staticmethod
     def cons(
-            ident: Ident=None,
+            ident: IdentSpec=None,
             state: ViewState=None,
             geometry: ViewGeometry=None,
             open: bool=False,
     ) -> 'Pane':
         return Pane(
-            ident or uuid4(),
+            ensure_ident(ident),
             state or ViewState.cons(),
             geometry or ViewGeometry.cons(),
             Boolean(open),

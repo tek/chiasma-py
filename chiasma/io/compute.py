@@ -146,10 +146,29 @@ class TmuxIO(Generic[A], F[A], ADT['TmuxIO'], implicits=True, auto=True, metacla
     def unsafe(self, tmux: Tmux) -> A:
         return self.either(tmux).get_or_raise()
 
-    def recover(self, f: Callable[[Exception], B]) -> 'TmuxIO[B]':
+    def recover(self, f: Callable[[Exception], A]) -> 'TmuxIO[A]':
         return TmuxIO.delay(self.attempt).map(__.value_or(f))
 
-    # FIXME use TResult
+    def recover_error(self, f: Callable[[str], A]) -> 'TmuxIO[A]':
+        def recover(r: TResult[A]) -> TmuxIO[A]:
+            return (
+                TmuxIO.pure(f(r.error))
+                if isinstance(r, TError) else
+                TmuxIO.exception(r.exception)
+                if isinstance(r, TFatal) else
+                TmuxIO.pure(r.value)
+            )
+        return TmuxIO.delay(self.result).flat_map(recover)
+
+    # def recover_error_with(self, f: Callable[[str], 'TmuxIO[A]']) -> 'TmuxIO[A]':
+    #     def recover(r: TResult[A]) -> TmuxIO[A]:
+    #         return (
+    #             f(r.error)
+    #             if isinstance(r, TError) else
+    #             r
+    #         )
+    #     return TmuxIO.delay(self.result).flat_map(recover)
+
     @do('TmuxIO[A]')
     def ensure(self, f: Callable[[Either[Exception, A]], 'TmuxIO[None]']) -> Do:
         result = yield TmuxIO.delay(self.attempt)

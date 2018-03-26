@@ -1,17 +1,17 @@
 from amino import Dat, Maybe
 
-from chiasma.util.id import Ident
+from chiasma.util.id import Ident, IdentSpec, ensure_ident
 
 
 class Window(Dat['Window']):
 
     @staticmethod
     def cons(
-            ident: Ident,
+            ident: IdentSpec,
             id: int=None,
     ) -> 'Window':
         return Window(
-            ident,
+            ensure_ident(ident),
             Maybe.check(id),
         )
 

@@ -1,16 +1,16 @@
 from amino import Dat
 
-from chiasma.util.id import Ident
+from chiasma.util.id import Ident, IdentSpec, ensure_ident
 
 
 class Layout(Dat['Layout']):
 
     @staticmethod
     def cons(
-        ident: Ident,
+        ident: IdentSpec,
     ) -> 'Layout':
         return Layout(
-            ident,
+            ensure_ident(ident),
         )
 
     def __init__(self, ident: Ident) -> None:

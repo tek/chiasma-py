@@ -2,7 +2,7 @@ from typing import TypeVar
 
 from amino.state import State
 from amino import do, Do, __, Either, Right, L, _, Left, Boolean, ADT
-from amino.dispatch import PatMat
+from amino.case import Case
 from amino.logging import module_log
 from amino.tc.context import context, Bindings
 
@@ -41,36 +41,31 @@ def find_or_create_window(ident: Ident) -> Do:
 
 
 @do(TS[TmuxData, WindowData])
-def create_tmux_window(session: Session, layout: LayoutNode[A, B], name: str) -> Do:
-    princ = yield principal(layout)
+def create_tmux_window(session: Session, ident: Ident) -> Do:
     sid = yield TS.from_maybe(session.id, 'no session id')
-    window = yield TS.lift(create_window(sid, name))
-    yield TS.modify(__.set_principal_id(window, princ))
-    yield TS.from_either(window)
+    yield TS.lift(create_window(sid, ident.str))
 
 
-@do(TS[TmuxData, None])
-def ensure_window(session: Session, window: Window, ui_window: Ident, layout: ViewTree) -> Do:
-    @do(Either[str, TmuxIO[Either[str, WindowData]]])
-    def existing() -> Do:
-        sid = yield session.id.to_either('session has no id')
-        wid = yield window.id.to_either('window has no id')
-        yield Right(session_window(sid, wid))
-    @do(TS[TmuxData, Either[str, WindowData]])
-    def sync(win_io: TmuxIO[Either[str, WindowData]]) -> Do:
-        win = yield TS.lift(win_io)
-        yield (
-            win /
-            L(sync_principal)(session, ui_window, layout, _) /
-            __.map(Right) |
-            (lambda: TS.pure(Left('window not open')))
-        )
-    win = yield (existing() / sync).value_or(TS.error)
-    yield win / TS.pure | (lambda: create_tmux_window(session, window, ui_window))
-    yield TS.unit
+@do(TmuxIO[Either[str, WindowData]])
+def existing_window(session: Session, window: Window) -> Do:
+    sid = yield TmuxIO.from_maybe(session.id, 'session has no id')
+    wid = yield TmuxIO.from_maybe(window.id, 'window has no id')
+    e = yield session_window(sid, wid)
+    yield TmuxIO.from_either(e)
 
 
-class ensure_view(PatMat, alg=ViewTree):
+@do(TS[TmuxData, Window])
+def ensure_window(session: Session, window: Window, window_ident: Ident, layout: ViewTree) -> Do:
+    @do(TS[TmuxData, Window])
+    def create(error: str) -> Do:
+        yield create_tmux_window(session, window_ident)
+    io = existing_window(session, window).map(TS.pure).recover_error(create)
+    window_data = yield TS.lift(io).join
+    yield sync_principal(window_ident, layout)
+    return Window.cons(window_ident, window_data.id)
+
+
+class ensure_view(Case, alg=ViewTree):
     '''synchronize a TmuxData window to tmux.
     After this step, all missing tmux entities are considered fatal.
     '''
@@ -98,7 +93,7 @@ class ensure_view(PatMat, alg=ViewTree):
         return TS.unit
 
 
-class position_view(PatMat, alg=ViewTree):
+class position_view(Case, alg=ViewTree):
 
     def __init__(self, vertical: Boolean, reference: Ident) -> None:
         self.vertical = vertical
@@ -118,7 +113,7 @@ class position_view(PatMat, alg=ViewTree):
         return TS.unit
 
 
-class resize_view(PatMat, alg=ViewTree):
+class resize_view(Case, alg=ViewTree):
 
     def __init__(self, vertical: Boolean, reference: Ident) -> None:
         self.vertical = vertical
@@ -142,7 +137,7 @@ class resize_view(PatMat, alg=ViewTree):
 
 
 # TODO sort views by `position` attr before positioning
-class pack_tree(PatMat, alg=ViewTree):
+class pack_tree(Case, alg=ViewTree):
 
     def __init__(self, session: Session, window: Window, principal: Ident) -> None:
         self.session = session
@@ -208,7 +203,7 @@ def window_state(ui_window: Ident, twindow: Window, layout: ViewTree) -> Do:
 
 
 @context(**measure_view_tree.bounds)
-class pack_window(PatMat, alg=WindowState):
+class pack_window(Case, alg=WindowState):
 
     def __init__(self, bindings: Bindings, session: Session, window: Window, principal: Ident) -> None:
         self.bindings = bindings

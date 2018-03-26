@@ -36,6 +36,9 @@ class TmuxData(Dat['TmuxData']):
         self.layouts = layouts
         self.panes = panes
 
+    def update_session(self, session: Session) -> 'TmuxData':
+        return lens.sessions.Each().Filter(_.ident == session.ident).set(session)(self)
+
     def add_pane(self, pane: Pane) -> 'TmuxData':
         return self.append1.panes(pane)
 

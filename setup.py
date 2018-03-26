@@ -13,7 +13,7 @@ setup(
     url='https://github.com/tek/chiasma',
     packages=find_packages(exclude=['unit', 'unit.*', 'integration', 'integration.*']),
     install_requires=[
-        'amino==13.0.0a11',
+        'amino==13.0.0a18',
         'psutil==5.3.1',
     ],
     tests_require=[

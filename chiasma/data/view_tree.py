@@ -3,7 +3,8 @@ from typing import Generic, TypeVar, Callable, Any
 from amino import ADT, List, Nil, Either, Right, Left, Boolean, Maybe, Nothing, __, _
 
 from chiasma.ui.view import UiPane
-from amino.dispatch import PatMat
+from chiasma.util.id import Ident
+from amino.case import Case
 from amino.tc.context import context
 
 
@@ -49,7 +50,7 @@ class SubUiNode(Generic[A, B], ViewTree[A, B]):
         self.data = data
 
 
-class reference_node(PatMat, alg=ViewTree):
+class reference_node(Case, alg=ViewTree):
 
     def pane_node(self, node: PaneNode[L, P]) -> Either[str, P]:
         return Right(node.data) if node.data.open else Left('pane closed')
@@ -61,7 +62,7 @@ class reference_node(PatMat, alg=ViewTree):
         return Left('SubUiNode')
 
 
-class find_in_view_tree(Generic[L, P], PatMat, alg=ViewTree):
+class find_in_view_tree(Generic[L, P], Case, alg=ViewTree):
 
     def __init__(
             self,
@@ -82,9 +83,9 @@ class find_in_view_tree(Generic[L, P], PatMat, alg=ViewTree):
         return self.sub_ui(node)
 
 
-class find_pane(PatMat, alg=ViewTree):
+class find_pane(Case, alg=ViewTree):
 
-    def __init__(self, ident: str) -> None:
+    def __init__(self, ident: Ident) -> None:
         self.ident = ident
 
     def pane_node(self, node: PaneNode[A, P]) -> Either[str, P]:
@@ -102,7 +103,7 @@ def layout_panes(node: LayoutNode) -> List[PaneNode]:
 
 
 @context(P=UiPane)
-class map_panes(PatMat, alg=ViewTree):
+class map_panes(Case, alg=ViewTree):
 
     def __init__(self, pred: Callable[[P], bool], update: Callable[[P], P]) -> None:
         self.pred = pred

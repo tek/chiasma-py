@@ -20,12 +20,12 @@ P = TypeVar('P')
 def render(bindings: Bindings, session_ident: Ident, window_ident: Ident, layout: ViewTree[LO, P]) -> Do:
     session = yield find_or_create_session(session_ident).tmux
     window = yield find_or_create_window(window_ident).tmux
-    yield TS.lift(ensure_session(session))
-    yield ensure_window(session, window, window_ident, layout)
-    yield ensure_view(session, window)(layout)
+    updated_session = yield ensure_session(session)
+    yield ensure_window(updated_session, window, window_ident, layout)
+    yield ensure_view(updated_session, window)(layout)
     ui_princ, t_princ = yield principal(layout)
     ws = yield window_state(window_ident, window, layout)
-    yield pack_window(bindings)(session, window, ui_princ)(ws)
+    yield pack_window(bindings)(updated_session, window, ui_princ)(ws)
 
 
 __all__ = ('render',)

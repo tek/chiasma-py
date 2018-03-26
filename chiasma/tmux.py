@@ -6,7 +6,7 @@ from amino.boolean import false, true
 from amino.string.hues import blue, red
 
 from amino.logging import Logging
-from amino.dispatch import PatMat
+from amino.case import Case
 
 from chiasma.data.session import Session
 from chiasma.data.window import Window
@@ -96,7 +96,7 @@ def parse_cmd_output(output: List[str]) -> List[str]:
     return output.fold_left(PState(false, Nil, Nil))(parse).cmds.drop(1)
 
 
-class create_cmd_result(PatMat, alg=POutput):
+class create_cmd_result(Case, alg=POutput):
 
     def __init__(self, cmd: TmuxCmd) -> None:
         self.cmd = cmd

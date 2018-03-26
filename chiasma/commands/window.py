@@ -55,8 +55,9 @@ def window_exists(id: str) -> Do:
 
 
 @do(TmuxIO[None])
-def create_window(session_id: str, name: str) -> Do:
-    yield TmuxIO.write('new-window', '-t', session_id, '-n', name)
+def create_window(session_id: str, ident: str) -> Do:
+    windows = yield tmux_data_cmd('new-window', List('-t', session_id, '-n', name, '-P'), cmd_data_window)
+    yield TmuxIO.from_maybe(windows.head, f'no output when creating window `{name}`')
 
 
 @do(TmuxIO[Either[str, List[WindowData]]])

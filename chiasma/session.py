@@ -1,4 +1,4 @@
-from amino import do, Do, __
+from amino import do, Do, __, Just
 from amino.state import State
 from amino.boolean import false
 
@@ -7,6 +7,7 @@ from chiasma.data.tmux import TmuxData
 from chiasma.io.compute import TmuxIO
 from chiasma.commands.session import session_exists, create_session
 from chiasma.data.session import Session
+from chiasma.io.state import TS
 
 
 @do(State[TmuxData, Session])
@@ -22,10 +23,18 @@ def find_or_create_session(ident: Ident) -> Do:
     yield session
 
 
-@do(TmuxIO[None])
+@do(TS[TmuxData, Session])
+def create_and_update_session(session: Session) -> Do:
+    session_data = yield TS.lift(create_session(session.ident.str))
+    updated_session = session.set.id(Just(session_data.id))
+    yield TS.modify(__.update_session(updated_session))
+    return updated_session
+
+
+@do(TS[TmuxData, Session])
 def ensure_session(session: Session) -> Do:
-    exists = yield session.id.map(session_exists) | TmuxIO.pure(false)
-    yield TmuxIO.pure(None) if exists else create_session(session.ident)
+    exists = yield TS.lift(session.id.map(session_exists) | TmuxIO.pure(false))
+    yield TS.pure(session) if exists else create_and_update_session(session)
 
 
 __all__ = ('add_session', 'find_or_create_session', 'ensure_session')

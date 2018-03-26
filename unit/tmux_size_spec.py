@@ -16,6 +16,7 @@ from chiasma.ui.simple import Layout as SimpleLayout, Pane as SimplePane
 from chiasma.render import render
 from chiasma.test.tmux_spec import TmuxSpec
 from chiasma.io.state import TS
+from chiasma.util.id import Ident, StrIdent, IdentSpec, ensure_ident
 
 A = TypeVar('A')
 B = TypeVar('B')
@@ -37,17 +38,18 @@ class SpecData(Dat['SpecData']):
 
 
 @do(TS[SpecData, None])
-def ui_open_pane(name: str) -> Do:
+def ui_open_pane(spec: IdentSpec) -> Do:
+    ident = ensure_ident(spec)
     layout = yield TS.inspect(_.layout)
-    updated = map_panes(P=SimplePane)(lambda a: Boolean(a.ident == name), lens.open.set(true))(layout)
+    updated = map_panes(P=SimplePane)(lambda a: Boolean(a.ident == ident), lens.open.set(true))(layout)
     yield TS.modify(__.set.layout(updated))
 
 
 @do(TS[SpecData, None])
-def open_pane(name: str) -> Do:
-    yield ui_open_pane(name)
+def open_pane(ident: Ident) -> Do:
+    yield ui_open_pane(ident)
     layout = yield TS.inspect(_.layout)
-    yield render(P=SimplePane, L=SimpleLayout)('main', 'main', layout).transform_s_lens(lens.tmux)
+    yield render(P=SimplePane, L=SimpleLayout)(StrIdent('main'), StrIdent('main'), layout).transform_s_lens(lens.tmux)
     yield TS.write('display-panes')
 
 
@@ -79,9 +81,9 @@ class LayoutSpec(TmuxSpec):
         data = SpecData.cons(layout)
         @do(TS[SpecData, None])
         def go() -> Do:
-            yield ui_open_pane('one')
-            yield ui_open_pane('two')
-            yield open_pane('three')
+            yield ui_open_pane(StrIdent('one'))
+            yield ui_open_pane(StrIdent('two'))
+            yield open_pane(StrIdent('three'))
             yield all_panes().state
         s, panes = self.run(go(), data)
         target = List((301, 44, 0), (150, 45, 45), (150, 45, 45))
@@ -178,17 +180,17 @@ class DistributeSizeSpec(TmuxSpec):
         layout = ViewTree.layout(
             SimpleLayout.cons('root', vertical=true),
             List(
-                ViewTree.pane(SimplePane.cons('one', geometry=ViewGeometry.cons(max_size=10))),
-                ViewTree.pane(SimplePane.cons('two', geometry=ViewGeometry.cons(max_size=10))),
-                ViewTree.pane(SimplePane.cons('three', geometry=ViewGeometry.cons(max_size=10))),
+                ViewTree.pane(SimplePane.cons(StrIdent('one'), geometry=ViewGeometry.cons(max_size=10))),
+                ViewTree.pane(SimplePane.cons(StrIdent('two'), geometry=ViewGeometry.cons(max_size=10))),
+                ViewTree.pane(SimplePane.cons(StrIdent('three'), geometry=ViewGeometry.cons(max_size=10))),
             )
         )
         data = SpecData.cons(layout)
         @do(TS[SpecData, List[PaneData]])
         def go() -> Do:
-            yield ui_open_pane('one')
-            yield ui_open_pane('two')
-            yield open_pane('three')
+            yield ui_open_pane(StrIdent('one'))
+            yield ui_open_pane(StrIdent('two'))
+            yield open_pane(StrIdent('three'))
             yield all_panes().state
         s, panes = self.run(go(), data)
         return k(panes / _.position) == List(0, 30, 60)

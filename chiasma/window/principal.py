@@ -1,6 +1,6 @@
 from typing import TypeVar, Tuple
 
-from amino.dispatch import PatMat
+from amino.case import Case
 from amino import Maybe, Just, Either, do, Do, __, Nothing
 
 from chiasma.data.view_tree import ViewTree, LayoutNode, PaneNode, SubUiNode
@@ -17,7 +17,7 @@ L = TypeVar('L')
 P = TypeVar('P')
 
 
-class FindPrincipal(PatMat, alg=ViewTree):
+class FindPrincipal(Case, alg=ViewTree):
 
     def layout_node(self, node: LayoutNode[L, P]) -> Maybe[P]:
         return node.sub.find_map(self)
@@ -50,7 +50,7 @@ def principal(layout: LayoutNode) -> Do:
 
 
 @do(TS[TmuxData, None])
-def sync_principal(session: Session, window: Ident, layout: LayoutNode, nwindow: WindowData) -> Do:
+def sync_principal(window: Ident, layout: LayoutNode) -> Do:
     (pane, tpane) = yield principal(layout)
     native = yield principal_native(window)
     yield TS.modify(__.update_pane(tpane.copy(id=Just(native.id))))
