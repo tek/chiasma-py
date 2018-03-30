@@ -358,7 +358,7 @@ def read_result(result: TmuxCmdResult) -> Either[List[str], List[str]]:
         if isinstance(result, TmuxCmdSuccess) else
         Left(result.output.output.cons(f'tmux command {result.cmd} failed:'))
         if isinstance(result, TmuxCmdError) else
-        Left(result.messages.cons(f'fatal tmux command execution int {result.cmds}:'))
+        Left(result.output.output.cons(f'fatal tmux command execution in {result.cmds}:'))
     )
 
 

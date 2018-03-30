@@ -20,7 +20,7 @@ class ViewTree(Generic[A, B], ADT['ViewTree[A, B]']):
     def layout(
             data: A,
             sub: List['ViewTree[A, B]']=Nil,
-    ) -> 'ViewTree[A, B]':
+    ) -> 'LayoutNode[A, B]':
         return LayoutNode(data, sub)
 
     @staticmethod

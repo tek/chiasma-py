@@ -58,9 +58,9 @@ class TmuxCmdError(TmuxCmdResult):
 
 class TmuxCmdFatal(TmuxCmdResult):
 
-    def __init__(self, cmds: List[TmuxCmd], messages: List[str]) -> None:
+    def __init__(self, cmds: List[TmuxCmd], output: PError) -> None:
         self.cmds = cmds
-        self.messages = messages
+        self.output = output
 
 
 class PState(Dat['PState']):
