@@ -3,7 +3,6 @@ from amino.lenses.lens import lens
 
 from chiasma.data.session import Session
 from chiasma.data.window import Window
-from chiasma.data.layout import Layout
 from chiasma.data.pane import Pane
 from chiasma.util.id import Ident
 
@@ -14,13 +13,11 @@ class TmuxData(Dat['TmuxData']):
     def cons(
             sessions: List[Session]=Nil,
             windows: List[Window]=Nil,
-            layouts: List[Layout]=Nil,
             panes: List[Pane]=Nil,
     ) -> 'TmuxData':
         return TmuxData(
             sessions,
             windows,
-            layouts,
             panes,
         )
 
@@ -28,12 +25,10 @@ class TmuxData(Dat['TmuxData']):
             self,
             sessions: List[Session],
             windows: List[Window],
-            layouts: List[Layout],
             panes: List[Pane],
     ) -> None:
         self.sessions = sessions
         self.windows = windows
-        self.layouts = layouts
         self.panes = panes
 
     def update_session(self, session: Session) -> 'TmuxData':
