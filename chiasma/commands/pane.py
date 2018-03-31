@@ -122,8 +122,8 @@ def pane_from_data(window: Window, pane: Pane) -> Do:
 
 @do(TmuxIO[PaneData])
 def create_pane_from_data(window: Window, pane: Pane) -> Do:
-    window_id = yield TmuxIO.from_maybe(window.id, lambda: f'{window} has no id')
-    panes = yield tmux_data_cmd('split-window', List('-t', window_id, '-d', '-P'), cmd_data_pane)
+    target_window = yield TmuxIO.from_maybe(window.id, lambda: f'{window} has no id')
+    panes = yield tmux_data_cmd('split-window', List('-t', window_id(target_window), '-d', '-P'), cmd_data_pane)
     yield TmuxIO.from_maybe(panes.head, lambda: f'no output when creating pane in {window}')
 
 
