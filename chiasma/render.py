@@ -2,6 +2,7 @@ from typing import TypeVar
 
 from amino.tc.context import context, Bindings
 from amino import do, Do
+from amino.logging import module_log
 
 from chiasma.window.main import pack_window, find_or_create_window, ensure_window, ensure_view, window_state
 from chiasma.data.tmux import TmuxData
@@ -11,6 +12,7 @@ from chiasma.session import find_or_create_session, ensure_session
 from chiasma.window.principal import principal
 from chiasma.io.state import TS
 
+log = module_log()
 LO = TypeVar('LO')
 P = TypeVar('P')
 
@@ -18,6 +20,7 @@ P = TypeVar('P')
 @context(**pack_window.bounds)
 @do(TS[TmuxData, None])
 def render(bindings: Bindings, session_ident: Ident, window_ident: Ident, layout: ViewTree[LO, P]) -> Do:
+    log.debug(f'rendering window {window_ident}')
     session = yield find_or_create_session(session_ident).tmux
     window = yield find_or_create_window(window_ident).tmux
     updated_session = yield ensure_session(session)

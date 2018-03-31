@@ -58,6 +58,7 @@ def existing_window(session: Session, window: Window) -> Do:
 def ensure_window(session: Session, window: Window, window_ident: Ident, layout: ViewTree) -> Do:
     @do(TS[TmuxData, Window])
     def create(error: str) -> Do:
+        log.debug(f'creating missing tmux window {window} ({window_ident})')
         yield create_tmux_window(session, window_ident)
     io = existing_window(session, window).map(TS.pure).recover_error(create)
     window_data = yield TS.lift(io).join

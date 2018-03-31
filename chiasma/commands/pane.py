@@ -1,5 +1,6 @@
 from amino import List, Either, Regex, do, Do, Dat, Right, Try, Left, Boolean, L, Lists, _, Path
 from amino.util.numeric import parse_int
+from amino.logging import module_log
 
 from chiasma.io.compute import TmuxIO
 from chiasma.command import tmux_data_cmd, TmuxCmdData
@@ -8,7 +9,7 @@ from chiasma.data.pane import Pane
 from chiasma.commands.window import window_id, parse_window_id
 from chiasma.commands.session import parse_session_id
 
-
+log = module_log()
 pane_id_re = Regex('^%(?P<id>\d+)$')
 
 
@@ -143,8 +144,13 @@ def move_pane(id: int, ref_id: int, vertical: Boolean) -> TmuxIO[None]:
     return TmuxIO.write('move-pane', '-s', pane_id(id), '-t', pane_id(ref_id), direction)
 
 
+def close_pane_id(pane_id: int) -> TmuxIO[None]:
+    return TmuxIO.write(*pane_cmd(pane_id, 'kill-pane'))
+
+
 def close_pane(pane: PaneData) -> TmuxIO[None]:
-    return TmuxIO.write(*pane_cmd(pane.id, 'kill-pane'))
+    log.debug(f'closing pane {pane}')
+    return close_pane_id(pane.id)
 
 
 def quote(data: str) -> str:
@@ -171,4 +177,4 @@ def pipe_pane(id: int, path: Path) -> TmuxIO[None]:
 
 
 __all__ = ('all_panes', 'window_panes', 'pane', 'resize_pane', 'pane_open', 'create_pane_from_data', 'move_pane',
-           'close_pane', 'send_keys', 'capture_pane', 'window_pane')
+           'close_pane', 'send_keys', 'capture_pane', 'window_pane', 'close_pane_id')

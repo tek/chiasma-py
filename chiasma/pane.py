@@ -3,6 +3,7 @@ from typing import TypeVar
 from amino import do, Do, __, Either, Boolean, _
 from amino.state import State
 from amino.boolean import false
+from amino.logging import module_log
 
 from chiasma.data.tmux import TmuxData
 from chiasma.data.pane import Pane
@@ -14,6 +15,7 @@ from chiasma.window.measure import MeasuredLayoutNode
 from chiasma.data.view_tree import layout_panes
 from chiasma.io.state import TS
 
+log = module_log()
 D = TypeVar('D')
 P = TypeVar('P')
 
@@ -34,6 +36,7 @@ def find_or_create_pane(ident: Ident) -> Do:
 
 @do(TS[TmuxData, PaneData])
 def create_tmux_pane(window: Window, pane: Pane) -> Do:
+    log.debug(f'creating tmux pane {pane} in {window}')
     data = yield TS.lift(create_pane_from_data(window, pane))
     yield TS.modify(__.set_pane_id(pane, data.id))
 
