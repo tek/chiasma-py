@@ -154,8 +154,8 @@ def close_pane(pane: PaneData) -> TmuxIO[None]:
 
 
 def quote(data: str) -> str:
-    escaped = data.replace("'", "\\'")
-    return f"'{escaped}'"
+    escaped = data.replace('"', '\\"')
+    return f'"{escaped}"'
 
 
 def send_keys(id: int, lines: List[str]) -> TmuxIO[None]:
