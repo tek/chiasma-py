@@ -3,6 +3,7 @@ from amino.util.numeric import parse_int
 
 from chiasma.io.compute import TmuxIO
 from chiasma.command import tmux_data_cmd, TmuxCmdData
+from chiasma.commands.session import session_id
 
 
 window_id_re = Regex('^@(?P<id>\d+)$')
