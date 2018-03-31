@@ -63,8 +63,8 @@ def create_window(target_session: int, ident: str) -> Do:
 
 
 @do(TmuxIO[Either[str, List[WindowData]]])
-def session_windows(session_id: str) -> Do:
-    yield tmux_data_cmd('list-windows', List('-t', session_id), cmd_data_window)
+def session_windows(sid: str) -> Do:
+    yield tmux_data_cmd('list-windows', List('-t', session_id(sid)), cmd_data_window)
 
 
 @do(TmuxIO[Either[str, WindowData]])
