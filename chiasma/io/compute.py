@@ -3,7 +3,7 @@ import inspect
 from traceback import FrameSummary
 from typing import TypeVar, Callable, Any, Generic, Union, Tuple
 
-from amino.tc.base import F
+from amino.tc.base import F, ImplicitsMeta
 from amino import Either, __, IO, Maybe, Left, Eval, List, Right, Lists, options, Nil, Just, Do, L, Nothing
 from amino.func import CallByName, tailrec
 from amino.do import do
@@ -19,7 +19,7 @@ C = TypeVar('C')
 S = TypeVar('S')
 
 
-class TmuxIOMeta(ADTMeta):
+class TmuxIOMeta(ADTMeta, ImplicitsMeta):
 
     @property
     def unit(self) -> 'TmuxIO[A]':
