@@ -9,7 +9,7 @@ class Session(Dat['Session']):
     def cons(
             ident: IdentSpec,
             id: int=None,
-    ) -> None:
+    ) -> 'Session':
         return Session(
             ensure_ident(ident),
             Maybe.check(id),
