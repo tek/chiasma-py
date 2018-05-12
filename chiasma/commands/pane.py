@@ -20,6 +20,16 @@ def parse_pane_id(pane_id: str) -> Do:
     yield parse_int(id_s)
 
 
+@do(Either[str, bool])
+def parse_bool(data: str) -> Do:
+    as_int = yield parse_int(data)
+    yield (
+        Right(as_int == 1)
+        if as_int in [0, 1] else
+        Left(f'invalid number for boolean: {as_int}')
+    )
+
+
 def pane_id(id: int) -> str:
     return f'%{id}'
 
