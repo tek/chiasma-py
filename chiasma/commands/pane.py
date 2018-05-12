@@ -141,7 +141,7 @@ def resize_pane(id: int, vertical: Boolean, size: int) -> TmuxIO[None]:
 
 def move_pane(id: int, ref_id: int, vertical: Boolean) -> TmuxIO[None]:
     direction = '-v' if vertical else '-h'
-    return TmuxIO.write('move-pane', '-s', pane_id(id), '-t', pane_id(ref_id), direction)
+    return TmuxIO.write('move-pane', '-d', '-s', pane_id(id), '-t', pane_id(ref_id), direction)
 
 
 def close_pane_id(pane_id: int) -> TmuxIO[None]:
