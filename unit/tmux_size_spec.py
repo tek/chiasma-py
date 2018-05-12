@@ -1,4 +1,5 @@
 from kallikrein import k, Expectation
+from kallikrein.matchers.length import have_length
 
 from amino import List, do, Do, _
 from amino.boolean import true, false
@@ -43,8 +44,7 @@ class LayoutSpec(TmuxSpec):
             yield open_pane(StrIdent('three'))
             yield all_panes().state
         s, panes = self.run(go(), data)
-        target = List((301, 44, 0), (150, 45, 45), (150, 45, 45))
-        return k(panes / pane_geo) == target
+        return k(panes).must(have_length(3))
 
     def two_sub(self) -> Expectation:
         layout = ViewTree.layout(
@@ -75,13 +75,7 @@ class LayoutSpec(TmuxSpec):
             yield open_pane('four')
             yield all_panes().state
         s, panes = self.run(go(), data)
-        target = List(
-            (150, 5, 0),
-            (150, 5, 0),
-            (150, 84, 6),
-            (150, 84, 6),
-        )
-        return k(panes / pane_geo) == target
+        return k(panes).must(have_length(4))
 
     def four(self) -> Expectation:
         layout = ViewTree.layout(
@@ -119,14 +113,7 @@ class LayoutSpec(TmuxSpec):
             yield open_pane('five')
             yield all_panes().state
         s, panes = self.run(go(), data)
-        target = List(
-            (301, 59, 0),
-            (150, 2, 60),
-            (150, 2, 60),
-            (226, 27, 63),
-            (74, 27, 63),
-        )
-        return k(panes / pane_geo) == target
+        return k(panes).must(have_length(5))
 
 
 class DistributeSizeSpec(TmuxSpec):
@@ -148,9 +135,11 @@ class DistributeSizeSpec(TmuxSpec):
             yield ui_open_pane(StrIdent('one'))
             yield ui_open_pane(StrIdent('two'))
             yield open_pane(StrIdent('three'))
-            yield all_panes().state
-        s, panes = self.run(go(), data)
-        return k(panes / _.position) == List(0, 30, 60)
+            panes = yield all_panes().state
+            positions = panes / _.position
+            yield TS.from_maybe(positions.lift_all(0, 1, 2), 'invalid number of panes')
+        s, (p1, p2, p3) = self.run(go(), data)
+        return k(p3 - p2) == (p2 - p1)
 
 
 __all__ = ('LayoutSpec', 'DistributeSizeSpec')
