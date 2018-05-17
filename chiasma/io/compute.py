@@ -26,7 +26,7 @@ class TmuxIOMeta(ADTMeta, ImplicitsMeta):
         return self.pure(None)
 
 
-class TmuxIO(Generic[A], F[A], ADT['TmuxIO'], implicits=True, auto=True, metaclass=TmuxIOMeta):
+class TmuxIO(Generic[A], F[A], ADT['TmuxIO[A]'], implicits=True, auto=True, metaclass=TmuxIOMeta):
     debug = options.io_debug.exists
 
     @staticmethod

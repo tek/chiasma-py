@@ -40,8 +40,8 @@ class LayoutNode(Generic[A, B], ViewTree[A, B]):
         self.data = data
         self.sub = sub
 
-        def replace_sub(node: ViewTree[A, B]) -> LayoutNode[A, B]:
-            return self.mod.sub(__.replace_where(node, _.data == node.data))
+    def replace_sub(self, node: ViewTree[A, B]) -> 'LayoutNode[A, B]':
+        return self.mod.sub(__.replace_where(node, _.data == node.data))
 
 
 class SubUiNode(Generic[A, B], ViewTree[A, B]):

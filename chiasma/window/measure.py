@@ -3,7 +3,7 @@ from typing import Callable, Generic, TypeVar
 import operator
 
 from amino.case import Case
-from amino import Either, Dat, _, List, Boolean, Maybe, Nil, Just, __, I, Left
+from amino import Either, Dat, _, List, Boolean, Maybe, Nil, Just, __, Left
 from amino.logging import module_log
 from amino.tc.context import context, Bindings
 
