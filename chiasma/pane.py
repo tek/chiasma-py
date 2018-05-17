@@ -1,6 +1,6 @@
 from typing import TypeVar
 
-from amino import do, Do, __, Either, Boolean, _
+from amino import do, Do, __, Either, Boolean, _, Path
 from amino.state import State
 from amino.boolean import false
 from amino.logging import module_log
@@ -35,15 +35,15 @@ def find_or_create_pane(ident: Ident) -> Do:
 
 
 @do(TS[TmuxData, PaneData])
-def create_tmux_pane(window: Window, pane: Pane) -> Do:
+def create_tmux_pane(window: Window, pane: Pane, dir: Path) -> Do:
     log.debug(f'creating tmux pane {pane} in {window}')
-    data = yield TS.lift(create_pane_from_data(window, pane))
+    data = yield TS.lift(create_pane_from_data(window, pane, dir))
     yield TS.modify(__.set_pane_id(pane, data.id))
 
 
 @do(TS[TmuxData, PaneData])
-def ensure_pane_open(window: Window, pane: Pane, npane: Either[str, PaneData]) -> Do:
-    yield npane / TS.pure | (lambda: create_tmux_pane(window, pane))
+def ensure_pane_open(window: Window, pane: Pane, npane: Either[str, PaneData], dir: Path) -> Do:
+    yield npane / TS.pure | (lambda: create_tmux_pane(window, pane, dir))
 
 
 @do(TS[TmuxData, PaneData])

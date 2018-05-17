@@ -1,4 +1,4 @@
-from amino import List, Either, Regex, do, Do, Dat, Right, Try, Left, Boolean, L, Lists, _, Path
+from amino import List, Either, Regex, do, Do, Dat, Right, Try, Left, Boolean, L, Lists, _, Path, IO
 from amino.util.numeric import parse_int
 from amino.logging import module_log
 
@@ -8,6 +8,7 @@ from chiasma.data.window import Window
 from chiasma.data.pane import Pane
 from chiasma.commands.window import window_id, parse_window_id
 from chiasma.commands.session import parse_session_id
+from chiasma.ui.view import UiPane
 
 log = module_log()
 pane_id_re = Regex('^%(?P<id>\d+)$')
@@ -132,9 +133,10 @@ def pane_from_data(window: Window, pane: Pane) -> Do:
 
 
 @do(TmuxIO[PaneData])
-def create_pane_from_data(window: Window, pane: Pane) -> Do:
+def create_pane_from_data(window: Window, pane: Pane, dir: Path) -> Do:
     target_window = yield TmuxIO.from_maybe(window.id, lambda: f'{window} has no id')
-    panes = yield tmux_data_cmd('split-window', List('-t', window_id(target_window), '-d', '-P'), cmd_data_pane)
+    args = List('-t', window_id(target_window), '-d', '-P', '-c', dir)
+    panes = yield tmux_data_cmd('split-window', args, cmd_data_pane)
     yield TmuxIO.from_maybe(panes.head, lambda: f'no output when creating pane in {window}')
 
 

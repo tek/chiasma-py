@@ -1,7 +1,7 @@
 from typing import TypeVar
 
 from amino.state import State
-from amino import do, Do, __, Either, Right, L, _, Left, Boolean, ADT
+from amino import do, Do, __, Either, Right, L, _, Left, Boolean, ADT, IO, Path
 from amino.case import Case
 from amino.logging import module_log
 from amino.tc.context import context, Bindings
@@ -20,6 +20,7 @@ from chiasma.commands.pane import pane_from_data, resize_pane, PaneData, window_
 from chiasma.window.measure import MeasuredLayoutNode, MeasuredPaneNode, measure_view_tree
 from chiasma.data.pane import Pane
 from chiasma.io.state import TS
+from chiasma.ui.view import UiPane
 
 log = module_log()
 A = TypeVar('A')
@@ -66,7 +67,13 @@ def ensure_window(session: Session, window: Window, window_ident: Ident, layout:
     return Window.cons(window_ident, window_data.id)
 
 
-class ensure_view(Case, alg=ViewTree):
+@do(TmuxIO[Path])
+def pane_dir(pane: P) -> Do:
+    ui_pane = yield TmuxIO.from_either(UiPane.e_for(pane))
+    yield (ui_pane.cwd(pane) / TmuxIO.pure).get_or(lambda: TmuxIO.from_io(IO.delay(Path.cwd)))
+
+
+class ensure_view(Case[ViewTree[LO, P], TS[TmuxData, None]], alg=ViewTree):
     '''synchronize a TmuxData window to tmux.
     After this step, all missing tmux entities are considered fatal.
     '''
@@ -76,21 +83,22 @@ class ensure_view(Case, alg=ViewTree):
         self.window = window
 
     @do(TS[TmuxData, None])
-    def layout_node(self, layout: LayoutNode) -> Do:
+    def layout_node(self, layout: LayoutNode[LO, P]) -> Do:
         yield layout.sub.traverse(self, TS)
 
     @do(TS[TmuxData, None])
-    def pane_node(self, node: PaneNode) -> Do:
+    def pane_node(self, node: PaneNode[LO, P]) -> Do:
         pane = node.data
         tpane = yield find_or_create_pane(node.data.ident).tmux
-        pane1 = yield TS.lift(pane_from_data(self.window, tpane))
+        tpane1 = yield TS.lift(pane_from_data(self.window, tpane))
+        dir = yield TS.lift(pane_dir(pane))
         yield (
-            ensure_pane_open(self.window, tpane, pane1)
+            ensure_pane_open(self.window, tpane, tpane1, dir)
             if pane.open else
-            ensure_pane_closed(self.window, tpane, pane1)
+            ensure_pane_closed(self.window, tpane, tpane1)
         )
 
-    def sub_ui_node(self, node: SubUiNode[L, P]) -> TS[TmuxData, None]:
+    def sub_ui_node(self, node: SubUiNode[LO, P]) -> TS[TmuxData, None]:
         return TS.unit
 
 

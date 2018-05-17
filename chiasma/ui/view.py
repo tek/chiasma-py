@@ -2,7 +2,7 @@ from typing import TypeVar
 import abc
 
 from amino.tc.base import TypeClass
-from amino import Boolean
+from amino import Boolean, Maybe, Path
 
 from chiasma.util.id import Ident
 from chiasma.ui.state import ViewState
@@ -41,6 +41,10 @@ class UiPane(TypeClass):
 
     @abc.abstractmethod
     def open(self, a: A) -> Boolean:
+        ...
+
+    @abc.abstractmethod
+    def cwd(self, a: A) -> Maybe[Path]:
         ...
 
 
