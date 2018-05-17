@@ -1,7 +1,7 @@
 from typing import TypeVar, Callable, Generic
 import inspect
 
-from amino import List, Either, Map, Lists, do, Do, _, L, Try, Dat
+from amino import List, Either, Map, Lists, do, Do, _, L, Try, Dat, Maybe
 
 from chiasma.io.compute import TmuxIO
 
@@ -40,6 +40,12 @@ class TmuxCmdData(Generic[A], Dat['TmuxCmdData[A]']):
 def simple_tmux_cmd_attrs(cmd: str, args: List[str], attrs: List[str]) -> Do:
     output = yield TmuxIO.read(cmd, '-F', tmux_fmt_attrs(attrs), *args)
     yield TmuxIO.pure(output / L(tmux_attr_map)(attrs, _))
+
+
+@do(TmuxIO[List[str]])
+def simple_tmux_cmd_attr(cmd: str, args: List[str], attr: str) -> Do:
+    attrs = yield simple_tmux_cmd_attrs(cmd, args, List(attr))
+    yield TmuxIO.from_maybe(attrs.traverse(lambda a: a.lift(attr), Maybe), f'attr `{attr}` missing in output')
 
 
 def cons_tmux_data(data: List[Map[str, str]], cons: Callable[..., Either[str, A]]) -> Either[str, A]:
