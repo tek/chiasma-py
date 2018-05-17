@@ -7,6 +7,7 @@ from amino import Dat
 from amino import ADT, Either, List
 from amino.json.decoder import Decoder, decode_json_type_json
 from amino.json.data import JsonError, Json
+from amino.json.decoders import ADTDecoder
 
 
 class Key(Dat['Key']):
@@ -73,6 +74,7 @@ class IdentDecoder(Decoder, tpe=Ident):
             decode_json_type_json(data, Key).lmap(List)
             .accum_error_lift(decode_uuid_ident, data)
             .accum_error_lift(decode_str_ident, data)
+            .accum_error_lift(ADTDecoder().decode, Ident, data)
         )
 
 
