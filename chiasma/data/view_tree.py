@@ -102,20 +102,32 @@ def layout_panes(node: LayoutNode) -> List[PaneNode]:
     return node.sub.filter(Boolean.is_a(PaneNode))
 
 
-@context(P=UiPane)
-class map_panes(Case, alg=ViewTree):
+class map_view_tree(Case[ViewTree[L, P], ViewTree[L, P]], alg=ViewTree):
 
-    def __init__(self, pred: Callable[[P], bool], update: Callable[[P], P]) -> None:
-        self.pred = pred
-        self.update = update
+    def __init__(
+            self,
+            pred_layout: Callable[[L], bool],
+            update_layout: Callable[[L], L],
+            pred_pane: Callable[[P], bool],
+            update_pane: Callable[[P], P],
+    ) -> None:
+        self.pred_layout = pred_layout
+        self.update_layout = update_layout
+        self.pred_pane = pred_pane
+        self.update_pane = update_pane
 
     def layout_node(self, node: LayoutNode[L, P]) -> ViewTree:
-        return node.mod.sub(__.map(self))
+        sub = node.mod.sub(__.map(self))
+        return (
+            sub.set.data(self.update_layout(sub.data))
+            if self.pred_layout(sub.data) else
+            sub
+        )
 
     def pane_node(self, node: PaneNode[L, P]) -> ViewTree:
         return (
-            node.mod.data(self.update)
-            if self.pred(node.data) else
+            node.mod.data(self.update_pane)
+            if self.pred_pane(node.data) else
             node
         )
 
@@ -123,5 +135,19 @@ class map_panes(Case, alg=ViewTree):
         return node
 
 
-__all__ = ('ViewTree', 'PaneNode', 'LayoutNode', 'reference_node', 'find_pane', 'layout_panes', 'map_panes',
-           'find_in_view_tree')
+def map_layouts(
+        pred_layout: Callable[[L], bool],
+        update_layout: Callable[[L], L],
+) -> Callable[[ViewTree[L, P]], ViewTree[L, P]]:
+    return map_view_tree(pred_layout, update_layout, lambda a: False, lambda a: a)
+
+
+def map_panes(
+        pred_pane: Callable[[P], bool],
+        update_pane: Callable[[P], P],
+) -> Callable[[ViewTree[L, P]], ViewTree[L, P]]:
+    return map_view_tree(lambda a: False, lambda a: a, pred_pane, update_pane)
+
+
+__all__ = ('ViewTree', 'PaneNode', 'LayoutNode', 'reference_node', 'find_pane', 'layout_panes', 'map_view_tree',
+           'find_in_view_tree', 'map_panes', 'map_layouts',)
