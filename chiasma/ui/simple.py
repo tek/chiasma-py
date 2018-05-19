@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from amino import Boolean, ADT
+from amino import Boolean, ADT, Maybe, Path
 from amino.tc.base import tc_prop
 
 from chiasma.util.id import Ident, IdentSpec, ensure_ident
@@ -52,12 +52,14 @@ class Pane(View):
             state: ViewState=None,
             geometry: ViewGeometry=None,
             open: bool=False,
+            cwd: Path=None,
     ) -> 'Pane':
         return Pane(
             ensure_ident(ident),
             state or ViewState.cons(),
             geometry or ViewGeometry.cons(),
             Boolean(open),
+            Maybe.optional(cwd),
         )
 
     def __init__(
@@ -66,9 +68,11 @@ class Pane(View):
             state: ViewState,
             geometry: ViewGeometry,
             open: Boolean,
+            cwd: Maybe[Path],
     ) -> None:
         super().__init__(ident, state, geometry)
         self.open = open
+        self.cwd = cwd
 
 
 class SimpleUiPane(UiPane, tpe=Pane):
@@ -80,6 +84,9 @@ class SimpleUiPane(UiPane, tpe=Pane):
     @tc_prop
     def open(self, a: Pane) -> Ident:
         return a.open
+
+    def cwd(self, a: Pane) -> Maybe[Path]:
+        return a.cwd
 
 
 class SimpleUiLayout(UiLayout, tpe=Layout):
