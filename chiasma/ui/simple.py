@@ -83,7 +83,10 @@ class SimpleUiPane(UiPane, tpe=Pane):
 
 
 class SimpleUiLayout(UiLayout, tpe=Layout):
-    pass
+
+    @tc_prop
+    def ident(self, a: Pane) -> Ident:
+        return a.ident
 
 
 class SimplePaneUiView(UiView, tpe=Pane):
