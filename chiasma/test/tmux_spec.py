@@ -24,7 +24,7 @@ class TmuxSpec(SpecBase):
     def setup(self) -> None:
         self.tmux_proc = start_tmux(tmux_spec_socket, self.win_width, self.win_height, self.tmux_in_terminal())
         self.tmux = Tmux.cons(tmux_spec_socket)
-        self._wait(1)
+        self._wait(.2)
         cmd = TmuxIO.read('list-clients -F "#{client_name}"')
         self.tmux_client = cmd.unsafe(self.tmux).head.get_or_fail('no clients')
 
@@ -34,10 +34,10 @@ class TmuxSpec(SpecBase):
         kill_server().result(self.tmux)
 
     def run(self, prog: TS[D, None], data: D) -> None:
-        self._wait(1)
+        self._wait(.2)
         r = prog.run(data).unsafe(self.tmux)
         TmuxIO.write('display-panes', '-t', self.tmux_client).result(self.tmux)
-        self._wait(1)
+        self._wait(.2)
         return r
 
 
