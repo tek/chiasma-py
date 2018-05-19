@@ -12,7 +12,7 @@ from chiasma.test.tmux_spec import TmuxSpec
 from chiasma.io.state import TS
 from chiasma.util.id import StrIdent
 
-from unit._support.data import SpecData, ui_open_pane, open_pane, pane_geo
+from unit._support.data import SpecData, ui_open_pane, open_pane
 
 
 class LayoutSpec(TmuxSpec):
