@@ -1,7 +1,7 @@
 from typing import TypeVar
 
 from amino.state import State
-from amino import do, Do, __, Either, Right, L, _, Left, Boolean, ADT, IO, Path
+from amino import do, Do, __, Either, L, _, Boolean, ADT, IO, Path
 from amino.case import Case
 from amino.logging import module_log
 from amino.tc.context import context, Bindings
@@ -17,7 +17,7 @@ from chiasma.io.compute import TmuxIO
 from chiasma.pane import (find_or_create_pane, ensure_pane_open, pack_pane, pane_by_ident, pane_id_fatal,
                           reference_pane, pane_by_id, ensure_pane_closed)
 from chiasma.commands.pane import pane_from_data, resize_pane, PaneData, window_panes
-from chiasma.window.measure import MeasuredLayoutNode, MeasuredPaneNode, measure_view_tree
+from chiasma.window.measure import MeasuredLayoutNode, MeasuredPaneNode, measure_view_tree, MeasuredView
 from chiasma.data.pane import Pane
 from chiasma.io.state import TS
 from chiasma.ui.view import UiPane
@@ -122,6 +122,15 @@ class position_view(Case, alg=ViewTree):
         return TS.unit
 
 
+@do(TS[TmuxData, None])
+def resize_view_with(mview: MeasuredView[A], pane_ident: Ident, vertical: bool) -> Do:
+    size = mview.measures.size
+    tpane = yield pane_by_ident(pane_ident)
+    id = yield pane_id_fatal(tpane)
+    log.debug(f'resize {mview.view} to {size} ({vertical})')
+    yield TS.lift(resize_pane(id, vertical, size))
+
+
 class resize_view(Case, alg=ViewTree):
 
     def __init__(self, vertical: Boolean, reference: Ident) -> None:
@@ -130,16 +139,13 @@ class resize_view(Case, alg=ViewTree):
 
     @do(TS[TmuxData, None])
     def layout_node(self, node: MeasuredLayoutNode) -> Do:
-        yield TS.unit
+        layout_reference = yield reference_pane(node)
+        reference = yield TS.from_either(layout_reference)
+        yield resize_view_with(node.data, reference.ident, self.vertical)
 
-    @do(TS[TmuxData, None])
-    def pane_node(self, node: MeasuredPaneNode) -> Do:
+    def pane_node(self, node: MeasuredPaneNode) -> TS[TmuxData, None]:
         mp = node.data
-        size = mp.measures.size
-        tpane = yield pane_by_ident(mp.view.ident)
-        id = yield pane_id_fatal(tpane)
-        log.debug(f'resize {mp.view} to {size} ({self.vertical})')
-        yield TS.lift(resize_pane(id, self.vertical, size))
+        return resize_view_with(mp, mp.view.ident, self.vertical)
 
     def sub_ui_node(self, node: SubUiNode[L, P]) -> TS[TmuxData, None]:
         return TS.unit
@@ -160,7 +166,7 @@ class pack_tree(Case, alg=ViewTree):
         new_reference = layout_reference | reference
         yield node.sub.traverse(position_view(vertical, new_reference), TS)
         yield node.sub.traverse(L(self)(_, new_reference), TS)
-        yield node.sub.traverse(resize_view(vertical, new_reference), TS)
+        yield node.sub.traverse(resize_view(vertical, new_reference.ident), TS)
         yield TS.unit
 
     @do(TS[TmuxData, None])
