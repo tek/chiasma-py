@@ -9,7 +9,7 @@ from chiasma.data.tmux import TmuxData
 from chiasma.util.id import Ident
 from chiasma.data.view_tree import ViewTree
 from chiasma.session import find_or_create_session, ensure_session
-from chiasma.window.principal import principal
+from chiasma.window.principal import principal_pane
 from chiasma.io.state import TS
 
 log = module_log()
@@ -26,7 +26,7 @@ def render(bindings: Bindings, session_ident: Ident, window_ident: Ident, layout
     updated_session = yield ensure_session(session)
     yield ensure_window(updated_session, window, window_ident, layout)
     yield ensure_view(updated_session, window)(layout)
-    ui_princ, t_princ = yield principal(layout)
+    ui_princ, t_princ = yield principal_pane(layout)
     ws = yield window_state(window_ident, window, layout)
     yield pack_window(bindings)(updated_session, window, ui_princ)(ws)
 

@@ -12,7 +12,7 @@ from chiasma.util.id import Ident
 from chiasma.commands.window import WindowData, create_window, session_window, window
 from chiasma.data.session import Session
 from chiasma.data.view_tree import LayoutNode, ViewTree, PaneNode, layout_panes, find_pane, SubUiNode
-from chiasma.window.principal import principal, sync_principal
+from chiasma.window.principal import sync_principal
 from chiasma.io.compute import TmuxIO
 from chiasma.pane import (find_or_create_pane, ensure_pane_open, pack_pane, pane_by_ident, pane_id_fatal,
                           reference_pane, pane_by_id, ensure_pane_closed)

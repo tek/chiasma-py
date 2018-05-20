@@ -1,6 +1,6 @@
 from typing import Generic, TypeVar, Callable, Any
 
-from amino import ADT, List, Nil, Either, Right, Left, Boolean, Maybe, Nothing, __, _
+from amino import ADT, List, Nil, Either, Right, Left, Boolean, Maybe, Nothing, __, _, do, Do, Dat
 
 from chiasma.ui.view import UiPane
 from chiasma.util.id import Ident
@@ -102,7 +102,21 @@ def layout_panes(node: LayoutNode) -> List[PaneNode]:
     return node.sub.filter(Boolean.is_a(PaneNode))
 
 
-class map_view_tree(Case[ViewTree[L, P], ViewTree[L, P]], alg=ViewTree):
+class ViewTreeCallbacks(Generic[L, P], Dat['ViewTreeCallbacks[L, P]']):
+
+    @staticmethod
+    def cons(
+            pred_layout: Callable[[L], bool]=None,
+            update_layout: Callable[[L], L]=None,
+            pred_pane: Callable[[P], bool]=None,
+            update_pane: Callable[[P], P]=None,
+    ) -> 'ViewTreeCallbacks':
+        return ViewTreeCallbacks(
+            pred_layout or (lambda a: False),
+            update_layout or (lambda a: a),
+            pred_pane or (lambda a: False),
+            update_pane or (lambda a: a),
+        )
 
     def __init__(
             self,
@@ -116,18 +130,24 @@ class map_view_tree(Case[ViewTree[L, P], ViewTree[L, P]], alg=ViewTree):
         self.pred_pane = pred_pane
         self.update_pane = update_pane
 
+
+class map_view_tree(Case[ViewTree[L, P], ViewTree[L, P]], alg=ViewTree):
+
+    def __init__(self, f: ViewTreeCallbacks[LayoutNode[L, P], PaneNode[L, P]]) -> None:
+        self.f = f
+
     def layout_node(self, node: LayoutNode[L, P]) -> ViewTree:
         sub = node.mod.sub(__.map(self))
         return (
-            sub.set.data(self.update_layout(sub.data))
-            if self.pred_layout(sub.data) else
+            self.f.update_layout(sub)
+            if self.f.pred_layout(sub) else
             sub
         )
 
     def pane_node(self, node: PaneNode[L, P]) -> ViewTree:
         return (
-            node.mod.data(self.update_pane)
-            if self.pred_pane(node.data) else
+            self.f.update_pane(node)
+            if self.f.pred_pane(node) else
             node
         )
 
@@ -135,19 +155,42 @@ class map_view_tree(Case[ViewTree[L, P], ViewTree[L, P]], alg=ViewTree):
         return node
 
 
-def map_layouts(
-        pred_layout: Callable[[L], bool],
-        update_layout: Callable[[L], L],
+def map_layout_nodes(
+        pred: Callable[[LayoutNode[L, P]], bool],
+        update: Callable[[LayoutNode[L, P]], LayoutNode[L, P]],
 ) -> Callable[[ViewTree[L, P]], ViewTree[L, P]]:
-    return map_view_tree(pred_layout, update_layout, lambda a: False, lambda a: a)
+    return map_view_tree(ViewTreeCallbacks.cons(pred_layout=pred, update_layout=update))
+
+
+def map_pane_nodes(
+        pred: Callable[[PaneNode[L, P]], bool],
+        update: Callable[[PaneNode[L, P]], PaneNode[L, P]],
+) -> Callable[[ViewTree[L, P]], ViewTree[L, P]]:
+    return map_views(ViewTreeCallbacks.cons(pred_pane=pred, update_pane=update))
+
+
+def map_views(f: ViewTreeCallbacks[L, P]) -> Callable[[ViewTree], ViewTree]:
+    return map_view_tree(ViewTreeCallbacks(
+        pred_layout=lambda a: f.pred_layout(a.data),
+        update_layout=lambda a: a.mod.data(f.update_layout),
+        pred_pane=lambda a: f.pred_pane(a.data),
+        update_pane=lambda a: a.mod.data(f.update_pane),
+    ))
+
+
+def map_layouts(
+        pred: Callable[[L], bool],
+        update: Callable[[L], L],
+) -> Callable[[ViewTree[L, P]], ViewTree[L, P]]:
+    return map_views(ViewTreeCallbacks.cons(pred_layout=pred, update_layout=update))
 
 
 def map_panes(
-        pred_pane: Callable[[P], bool],
-        update_pane: Callable[[P], P],
+        pred: Callable[[P], bool],
+        update: Callable[[P], P],
 ) -> Callable[[ViewTree[L, P]], ViewTree[L, P]]:
-    return map_view_tree(lambda a: False, lambda a: a, pred_pane, update_pane)
+    return map_views(ViewTreeCallbacks.cons(pred_pane=pred, update_pane=update))
 
 
-__all__ = ('ViewTree', 'PaneNode', 'LayoutNode', 'reference_node', 'find_pane', 'layout_panes', 'map_view_tree',
-           'find_in_view_tree', 'map_panes', 'map_layouts',)
+__all__ = ('ViewTree', 'PaneNode', 'LayoutNode', 'reference_node', 'find_pane', 'layout_panes', 'map_views',
+           'find_in_view_tree', 'map_panes', 'map_layouts', 'map_view_tree', 'map_layout_nodes', 'map_pane_nodes',)

@@ -1,4 +1,4 @@
-from typing import TypeVar
+from typing import TypeVar, Generic
 import abc
 
 from amino.tc.base import TypeClass
@@ -11,14 +11,14 @@ from chiasma.ui.view_geometry import ViewGeometry
 A = TypeVar('A')
 
 
-class UiWindow(TypeClass):
+class UiWindow(Generic[A], TypeClass):
 
     @abc.abstractmethod
     def name(self, a: A) -> str:
         ...
 
 
-class UiView(TypeClass):
+class UiView(Generic[A], TypeClass):
 
     @abc.abstractmethod
     def state(self, a: A) -> ViewState:
@@ -28,18 +28,19 @@ class UiView(TypeClass):
     def geometry(self, a: A) -> ViewGeometry:
         ...
 
-
-class UiLayout(TypeClass):
-
     @abc.abstractmethod
     def ident(self, a: A) -> Ident:
         ...
 
     def has_ident(self, a: A, ident: IdentSpec) -> bool:
-        return a.ident == ensure_ident(ident)
+        return self.ident(a) == ensure_ident(ident)
 
 
-class UiPane(TypeClass):
+class UiLayout(Generic[A], TypeClass):
+    pass
+
+
+class UiPane(Generic[A], TypeClass):
 
     @abc.abstractmethod
     def ident(self, a: A) -> Ident:

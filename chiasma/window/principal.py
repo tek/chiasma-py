@@ -8,8 +8,6 @@ from chiasma.data.tmux import TmuxData
 from chiasma.commands.pane import PaneData, window_panes
 from chiasma.util.id import Ident
 from chiasma.data.pane import Pane
-from chiasma.data.session import Session
-from chiasma.commands.window import WindowData
 from chiasma.pane import add_pane
 from chiasma.io.state import TS
 
@@ -42,7 +40,7 @@ def principal_native(window: Ident) -> Do:
 
 
 @do(TS[TmuxData, Tuple[P, Pane]])
-def principal(layout: LayoutNode) -> Do:
+def principal_pane(layout: LayoutNode) -> Do:
     pane = yield TS.from_either(find_principal(layout))
     existing = yield TS.inspect(__.pane_by_ident(pane.ident))
     tpane = yield existing / TS.pure | (lambda: add_pane(pane.ident).tmux)
@@ -51,9 +49,9 @@ def principal(layout: LayoutNode) -> Do:
 
 @do(TS[TmuxData, None])
 def sync_principal(window: Ident, layout: LayoutNode) -> Do:
-    (pane, tpane) = yield principal(layout)
+    (pane, tpane) = yield principal_pane(layout)
     native = yield principal_native(window)
     yield TS.modify(__.update_pane(tpane.copy(id=Just(native.id))))
 
 
-__all__ = ('find_principal', 'principal_native', 'principal', 'sync_principal')
+__all__ = ('find_principal', 'principal_native', 'principal_pane', 'sync_principal')

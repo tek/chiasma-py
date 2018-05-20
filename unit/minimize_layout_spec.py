@@ -7,7 +7,7 @@ from amino.lenses.lens import lens
 
 from chiasma.commands.pane import all_panes
 from chiasma.data.view_tree import ViewTree, map_layouts
-from chiasma.ui.simple import Layout as SimpleLayout, Pane as SimplePane, SimpleUiLayout
+from chiasma.ui.simple import SimpleLayout, SimplePane, SimpleLayoutUiView
 from chiasma.test.tmux_spec import TmuxSpec
 from chiasma.io.state import TS
 from chiasma.util.id import StrIdent

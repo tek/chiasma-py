@@ -1,4 +1,4 @@
-from uuid import uuid4
+from typing import Callable
 
 from amino import Boolean, ADT, Maybe, Path
 from amino.tc.base import tc_prop
@@ -7,9 +7,10 @@ from chiasma.util.id import Ident, IdentSpec, ensure_ident
 from chiasma.ui.view_geometry import ViewGeometry
 from chiasma.ui.view import UiPane, UiLayout, UiView
 from chiasma.ui.state import ViewState
+from chiasma.data.view_tree import ViewTree
 
 
-class View(ADT['View']):
+class SimpleView(ADT['SimpleView']):
 
     def __init__(self, ident: Ident, state: ViewState, geometry: ViewGeometry) -> None:
         self.ident = ident
@@ -17,7 +18,7 @@ class View(ADT['View']):
         self.geometry = geometry
 
 
-class Layout(View):
+class SimpleLayout(SimpleView):
 
     @staticmethod
     def cons(
@@ -25,8 +26,8 @@ class Layout(View):
             state: ViewState=None,
             geometry: ViewGeometry=None,
             vertical: bool=True,
-    ) -> 'Layout':
-        return Layout(
+    ) -> 'SimpleLayout':
+        return SimpleLayout(
             ensure_ident(ident),
             state or ViewState.cons(),
             geometry or ViewGeometry.cons(),
@@ -44,7 +45,7 @@ class Layout(View):
         self.vertical = vertical
 
 
-class Pane(View):
+class SimplePane(SimpleView):
 
     @staticmethod
     def cons(
@@ -53,8 +54,8 @@ class Pane(View):
             geometry: ViewGeometry=None,
             open: bool=False,
             cwd: Path=None,
-    ) -> 'Pane':
-        return Pane(
+    ) -> 'SimplePane':
+        return SimplePane(
             ensure_ident(ident),
             state or ViewState.cons(),
             geometry or ViewGeometry.cons(),
@@ -75,43 +76,58 @@ class Pane(View):
         self.cwd = cwd
 
 
-class SimpleUiPane(UiPane, tpe=Pane):
+class SimpleUiPane(UiPane[SimplePane], tpe=SimplePane):
 
     @tc_prop
-    def ident(self, a: Pane) -> Ident:
+    def ident(self, a: SimplePane) -> Ident:
         return a.ident
 
     @tc_prop
-    def open(self, a: Pane) -> Ident:
+    def open(self, a: SimplePane) -> Boolean:
         return a.open
 
-    def cwd(self, a: Pane) -> Maybe[Path]:
+    def cwd(self, a: SimplePane) -> Maybe[Path]:
         return a.cwd
 
 
-class SimpleUiLayout(UiLayout, tpe=Layout):
+class SimpleUiLayout(UiLayout[SimpleLayout], tpe=SimpleLayout):
 
     @tc_prop
-    def ident(self, a: Pane) -> Ident:
+    def ident(self, a: SimpleLayout) -> Ident:
         return a.ident
 
 
-class SimplePaneUiView(UiView, tpe=Pane):
+class SimplePaneUiView(UiView[SimplePane], tpe=SimplePane):
 
-    def state(self, a: Pane) -> ViewState:
+    def ident(self, a: SimplePane) -> Ident:
+        return a.ident
+
+    def state(self, a: SimplePane) -> ViewState:
         return a.state
 
-    def geometry(self, a: Pane) -> ViewGeometry:
+    def geometry(self, a: SimplePane) -> ViewGeometry:
         return a.geometry
 
 
-class SimpleLayoutUiView(UiView, tpe=Layout):
+class SimpleLayoutUiView(UiView[SimpleLayout], tpe=SimpleLayout):
 
-    def state(self, a: Layout) -> ViewState:
+    def ident(self, a: SimpleLayout) -> Ident:
+        return a.ident
+
+    def state(self, a: SimpleLayout) -> ViewState:
         return a.state
 
-    def geometry(self, a: Layout) -> ViewGeometry:
+    def geometry(self, a: SimpleLayout) -> ViewGeometry:
         return a.geometry
 
 
-__all__ = ('View', 'Layout', 'Pane')
+def has_ident(ident_spec: IdentSpec) -> Callable[[SimpleView], bool]:
+    ident = ensure_ident(ident_spec)
+    def has_ident(view: SimpleView) -> bool:
+        return view.ident == ident
+    return has_ident
+
+
+SimpleViewTree = ViewTree[SimpleLayout, SimplePane]
+
+__all__ = ('SimpleView', 'SimpleLayout', 'SimplePane', 'has_ident', 'SimpleViewTree',)

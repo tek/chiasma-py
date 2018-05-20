@@ -6,7 +6,7 @@ from amino.util.numeric import parse_int
 
 from chiasma.commands.pane import all_panes, parse_bool, parse_pane_id
 from chiasma.data.view_tree import ViewTree
-from chiasma.ui.simple import Layout as SimpleLayout, Pane as SimplePane
+from chiasma.ui.simple import SimpleLayout, SimplePane
 from chiasma.test.tmux_spec import TmuxSpec
 from chiasma.io.state import TS
 from chiasma.util.id import StrIdent
