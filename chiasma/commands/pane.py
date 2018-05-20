@@ -114,6 +114,18 @@ def pane(pane_id: int) -> Do:
     yield TmuxIO.from_maybe(panes.find(_.id == pane_id), f'no pane with id `{pane_id}`')
 
 
+@do(TmuxIO[int])
+def pane_width(id: int) -> Do:
+    p = yield pane(id)
+    return p.width
+
+
+@do(TmuxIO[int])
+def pane_height(id: int) -> Do:
+    p = yield pane(id)
+    return p.height
+
+
 @do(Either[str, PaneLoc])
 def pane_loc(window: Window, pane: Pane) -> Do:
     window_id = yield window.id.to_either(lambda: f'{window} has no id')
@@ -189,4 +201,4 @@ def pipe_pane(id: int, path: Path) -> TmuxIO[None]:
 
 
 __all__ = ('all_panes', 'window_panes', 'pane', 'resize_pane', 'pane_open', 'create_pane_from_data', 'move_pane',
-           'close_pane', 'send_keys', 'capture_pane', 'window_pane', 'close_pane_id')
+           'close_pane', 'send_keys', 'capture_pane', 'window_pane', 'close_pane_id', 'pane_width', 'pane_height',)
