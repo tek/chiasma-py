@@ -4,7 +4,7 @@ from amino.case import Case
 from amino import Maybe, Just, Either, do, Do, __, Nothing
 
 from chiasma.data.view_tree import ViewTree, LayoutNode, PaneNode, SubUiNode
-from chiasma.data.tmux import TmuxData
+from chiasma.data.tmux import Views
 from chiasma.commands.pane import PaneData, window_panes
 from chiasma.util.id import Ident
 from chiasma.data.pane import Pane
@@ -31,7 +31,7 @@ def find_principal(layout: LayoutNode) -> Either[str, P]:
     return FindPrincipal.match(layout).to_either(f'window contains no pane')
 
 
-@do(TS[TmuxData, PaneData])
+@do(TS[Views, PaneData])
 def principal_native(window: Ident) -> Do:
     twin = yield TS.inspect_f(__.window_by_ident(window))
     window_id = yield TS.from_either(twin.id.to_either('no window id'))
@@ -39,7 +39,7 @@ def principal_native(window: Ident) -> Do:
     yield TS.from_either(panes.head.to_either(lambda: f'no tmux panes in {window}'))
 
 
-@do(TS[TmuxData, Tuple[P, Pane]])
+@do(TS[Views, Tuple[P, Pane]])
 def principal_pane(layout: LayoutNode) -> Do:
     pane = yield TS.from_either(find_principal(layout))
     existing = yield TS.inspect(__.pane_by_ident(pane.ident))
@@ -47,7 +47,7 @@ def principal_pane(layout: LayoutNode) -> Do:
     yield TS.pure((pane, tpane))
 
 
-@do(TS[TmuxData, None])
+@do(TS[Views, None])
 def sync_principal(window: Ident, layout: LayoutNode) -> Do:
     (pane, tpane) = yield principal_pane(layout)
     native = yield principal_native(window)

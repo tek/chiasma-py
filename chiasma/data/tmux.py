@@ -7,15 +7,15 @@ from chiasma.data.pane import Pane
 from chiasma.util.id import Ident
 
 
-class TmuxData(Dat['TmuxData']):
+class Views(Dat['Views']):
 
     @staticmethod
     def cons(
             sessions: List[Session]=Nil,
             windows: List[Window]=Nil,
             panes: List[Pane]=Nil,
-    ) -> 'TmuxData':
-        return TmuxData(
+    ) -> 'Views':
+        return Views(
             sessions,
             windows,
             panes,
@@ -31,16 +31,16 @@ class TmuxData(Dat['TmuxData']):
         self.windows = windows
         self.panes = panes
 
-    def update_session(self, session: Session) -> 'TmuxData':
+    def update_session(self, session: Session) -> 'Views':
         return lens.sessions.Each().Filter(_.ident == session.ident).set(session)(self)
 
-    def add_pane(self, pane: Pane) -> 'TmuxData':
+    def add_pane(self, pane: Pane) -> 'Views':
         return self.append1.panes(pane)
 
-    def update_pane(self, pane: Pane) -> 'TmuxData':
+    def update_pane(self, pane: Pane) -> 'Views':
         return lens.panes.Each().Filter(_.ident == pane.ident).set(pane)(self)
 
-    def set_pane_id(self, pane: Pane, id: str) -> 'TmuxData':
+    def set_pane_id(self, pane: Pane, id: str) -> 'Views':
         return self.update_pane(pane.copy(id=Just(id)))
 
     def session_by_ident(self, ident: Ident) -> Either[str, Session]:
@@ -53,4 +53,4 @@ class TmuxData(Dat['TmuxData']):
         return self.panes.find(_.ident == ident).to_either(lambda: f'no pane for `{ident}`')
 
 
-__all__ = ('TmuxData',)
+__all__ = ('Views',)

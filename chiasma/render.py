@@ -5,7 +5,7 @@ from amino import do, Do
 from amino.logging import module_log
 
 from chiasma.window.main import pack_window, find_or_create_window, ensure_window, ensure_view, window_state
-from chiasma.data.tmux import TmuxData
+from chiasma.data.tmux import Views
 from chiasma.util.id import Ident
 from chiasma.data.view_tree import ViewTree
 from chiasma.session import find_or_create_session, ensure_session
@@ -18,7 +18,7 @@ P = TypeVar('P')
 
 
 @context(**pack_window.bounds)
-@do(TS[TmuxData, None])
+@do(TS[Views, None])
 def render(bindings: Bindings, session_ident: Ident, window_ident: Ident, layout: ViewTree[LO, P]) -> Do:
     log.debug(f'rendering window {window_ident}')
     session = yield find_or_create_session(session_ident).tmux

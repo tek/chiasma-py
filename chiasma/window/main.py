@@ -6,7 +6,7 @@ from amino.case import Case
 from amino.logging import module_log
 from amino.tc.context import context, Bindings
 
-from chiasma.data.tmux import TmuxData
+from chiasma.data.tmux import Views
 from chiasma.data.window import Window
 from chiasma.util.id import Ident
 from chiasma.commands.window import WindowData, create_window, session_window, window
@@ -29,19 +29,19 @@ P = TypeVar('P')
 LO = TypeVar('LO')
 
 
-@do(State[TmuxData, Window])
+@do(State[Views, Window])
 def add_window(ident: Ident) -> Do:
     twindow = Window.cons(ident)
     yield State.pure(twindow)
 
 
-@do(State[TmuxData, Window])
+@do(State[Views, Window])
 def find_or_create_window(ident: Ident) -> Do:
     existing = yield State.inspect(__.window_by_ident(ident))
     yield existing.cata(lambda err: add_window(ident), State.pure)
 
 
-@do(TS[TmuxData, WindowData])
+@do(TS[Views, WindowData])
 def create_tmux_window(session: Session, ident: Ident) -> Do:
     sid = yield TS.from_maybe(session.id, 'no session id')
     yield TS.lift(create_window(sid, ident.str))
@@ -55,9 +55,9 @@ def existing_window(session: Session, window: Window) -> Do:
     yield TmuxIO.from_either(e)
 
 
-@do(TS[TmuxData, Window])
+@do(TS[Views, Window])
 def ensure_window(session: Session, window: Window, window_ident: Ident, layout: ViewTree) -> Do:
-    @do(TS[TmuxData, Window])
+    @do(TS[Views, Window])
     def create(error: str) -> Do:
         log.debug(f'creating missing tmux window {window} ({window_ident}) because {error}')
         yield create_tmux_window(session, window_ident)
@@ -73,8 +73,8 @@ def pane_dir(pane: P) -> Do:
     yield (ui_pane.cwd(pane) / TmuxIO.pure).get_or(lambda: TmuxIO.from_io(IO.delay(Path.cwd)))
 
 
-class ensure_view(Case[ViewTree[LO, P], TS[TmuxData, None]], alg=ViewTree):
-    '''synchronize a TmuxData window to tmux.
+class ensure_view(Case[ViewTree[LO, P], TS[Views, None]], alg=ViewTree):
+    '''synchronize a Views window to tmux.
     After this step, all missing tmux entities are considered fatal.
     '''
 
@@ -82,11 +82,11 @@ class ensure_view(Case[ViewTree[LO, P], TS[TmuxData, None]], alg=ViewTree):
         self.session = session
         self.window = window
 
-    @do(TS[TmuxData, None])
+    @do(TS[Views, None])
     def layout_node(self, layout: LayoutNode[LO, P]) -> Do:
         yield layout.sub.traverse(self, TS)
 
-    @do(TS[TmuxData, None])
+    @do(TS[Views, None])
     def pane_node(self, node: PaneNode[LO, P]) -> Do:
         pane = node.data
         tpane = yield find_or_create_pane(node.data.ident).tmux
@@ -98,7 +98,7 @@ class ensure_view(Case[ViewTree[LO, P], TS[TmuxData, None]], alg=ViewTree):
             ensure_pane_closed(self.window, tpane, tpane1)
         )
 
-    def sub_ui_node(self, node: SubUiNode[LO, P]) -> TS[TmuxData, None]:
+    def sub_ui_node(self, node: SubUiNode[LO, P]) -> TS[Views, None]:
         return TS.unit
 
 
@@ -108,21 +108,21 @@ class position_view(Case, alg=ViewTree):
         self.vertical = vertical
         self.reference = reference
 
-    @do(TS[TmuxData, None])
+    @do(TS[Views, None])
     def layout_node(self, node: MeasuredLayoutNode[LO, P]) -> Do:
         pane = layout_panes(node).head
         yield pane / _.data.view / L(pack_pane)(_, self.reference, self.vertical) | TS.unit
 
-    @do(TS[TmuxData, None])
+    @do(TS[Views, None])
     def pane_node(self, node: MeasuredPaneNode) -> Do:
         yield pack_pane(node.data.view, self.reference, self.vertical)
         yield TS.unit
 
-    def sub_ui_node(self, node: SubUiNode[L, P]) -> TS[TmuxData, None]:
+    def sub_ui_node(self, node: SubUiNode[L, P]) -> TS[Views, None]:
         return TS.unit
 
 
-@do(TS[TmuxData, None])
+@do(TS[Views, None])
 def resize_view_with(mview: MeasuredView[A], pane_ident: Ident, vertical: bool) -> Do:
     size = mview.measures.size
     tpane = yield pane_by_ident(pane_ident)
@@ -137,17 +137,17 @@ class resize_view(Case, alg=ViewTree):
         self.vertical = vertical
         self.reference = reference
 
-    @do(TS[TmuxData, None])
+    @do(TS[Views, None])
     def layout_node(self, node: MeasuredLayoutNode) -> Do:
         layout_reference = yield reference_pane(node)
         reference = yield TS.from_either(layout_reference)
         yield resize_view_with(node.data, reference.ident, self.vertical)
 
-    def pane_node(self, node: MeasuredPaneNode) -> TS[TmuxData, None]:
+    def pane_node(self, node: MeasuredPaneNode) -> TS[Views, None]:
         mp = node.data
         return resize_view_with(mp, mp.view.ident, self.vertical)
 
-    def sub_ui_node(self, node: SubUiNode[L, P]) -> TS[TmuxData, None]:
+    def sub_ui_node(self, node: SubUiNode[L, P]) -> TS[Views, None]:
         return TS.unit
 
 
@@ -159,7 +159,7 @@ class pack_tree(Case, alg=ViewTree):
         self.window = window
         self.principal = principal
 
-    @do(TS[TmuxData, None])
+    @do(TS[Views, None])
     def layout_node(self, node: MeasuredLayoutNode, reference: P) -> Do:
         vertical = node.data.view.vertical
         layout_reference = yield reference_pane(node)
@@ -169,11 +169,11 @@ class pack_tree(Case, alg=ViewTree):
         yield node.sub.traverse(resize_view(vertical, new_reference.ident), TS)
         yield TS.unit
 
-    @do(TS[TmuxData, None])
+    @do(TS[Views, None])
     def pane_node(self, node: PaneNode, reference: P) -> Do:
         yield TS.unit
 
-    def sub_ui_node(self, node: SubUiNode[L, P], reference: P) -> TS[TmuxData, None]:
+    def sub_ui_node(self, node: SubUiNode[L, P], reference: P) -> TS[Views, None]:
         return TS.unit
 
 
@@ -201,7 +201,7 @@ class TrackedWindow(WindowState):
         self.pane = pane
 
 
-@do(TS[TmuxData, WindowState])
+@do(TS[Views, WindowState])
 def window_state(ui_window: Ident, twindow: Window, layout: ViewTree) -> Do:
     window_id = yield TS.from_maybe(twindow.id, 'window_state: `{twindow}` has no id')
     native_window_e = yield TS.lift(window(window_id))
@@ -226,12 +226,12 @@ class pack_window(Case, alg=WindowState):
         self.window = window
         self.principal = principal
 
-    @do(TS[TmuxData, None])
+    @do(TS[Views, None])
     def pristine_window(self, win: PristineWindow) -> Do:
         yield TS.unit
         # yield pack_tree(session, window, ui_princ)(ui_window.layout, false, Left('initial'))
 
-    @do(TS[TmuxData, None])
+    @do(TS[Views, None])
     def tracked_window(self, win: TrackedWindow) -> Do:
         ref = yield TS.from_either(find_pane(win.pane.ident)(win.layout))
         width, height = int(win.native_window.width), int(win.native_window.height)
