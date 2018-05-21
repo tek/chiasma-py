@@ -12,7 +12,7 @@ from chiasma.test.tmux_spec import TmuxSpec
 from chiasma.io.state import TS
 from chiasma.util.id import StrIdent
 
-from unit._support.data import SpecData, ui_open_pane, open_pane
+from unit._support.data import SpecData, ui_open_simple_pane, open_simple_pane
 
 
 class LayoutSpec(TmuxSpec):
@@ -39,9 +39,9 @@ class LayoutSpec(TmuxSpec):
         data = SpecData.cons(layout)
         @do(TS[SpecData, None])
         def go() -> Do:
-            yield ui_open_pane(StrIdent('one'))
-            yield ui_open_pane(StrIdent('two'))
-            yield open_pane(StrIdent('three'))
+            yield ui_open_simple_pane(StrIdent('one'))
+            yield ui_open_simple_pane(StrIdent('two'))
+            yield open_simple_pane(StrIdent('three'))
             yield all_panes().state
         s, panes = self.run(go(), data)
         return k(panes).must(have_length(3))
@@ -69,10 +69,10 @@ class LayoutSpec(TmuxSpec):
         data = SpecData.cons(layout)
         @do(TS[SpecData, None])
         def go() -> Do:
-            yield ui_open_pane('one')
-            yield ui_open_pane('two')
-            yield ui_open_pane('three')
-            yield open_pane('four')
+            yield ui_open_simple_pane('one')
+            yield ui_open_simple_pane('two')
+            yield ui_open_simple_pane('three')
+            yield open_simple_pane('four')
             yield all_panes().state
         s, panes = self.run(go(), data)
         return k(panes).must(have_length(4))
@@ -106,11 +106,11 @@ class LayoutSpec(TmuxSpec):
         data = SpecData.cons(layout)
         @do(TS[SpecData, None])
         def go() -> Do:
-            yield ui_open_pane('one')
-            yield ui_open_pane('two')
-            yield ui_open_pane('three')
-            yield ui_open_pane('four')
-            yield open_pane('five')
+            yield ui_open_simple_pane('one')
+            yield ui_open_simple_pane('two')
+            yield ui_open_simple_pane('three')
+            yield ui_open_simple_pane('four')
+            yield open_simple_pane('five')
             yield all_panes().state
         s, panes = self.run(go(), data)
         return k(panes).must(have_length(5))
@@ -132,9 +132,9 @@ class DistributeSizeSpec(TmuxSpec):
         data = SpecData.cons(layout)
         @do(TS[SpecData, List[PaneData]])
         def go() -> Do:
-            yield ui_open_pane(StrIdent('one'))
-            yield ui_open_pane(StrIdent('two'))
-            yield open_pane(StrIdent('three'))
+            yield ui_open_simple_pane(StrIdent('one'))
+            yield ui_open_simple_pane(StrIdent('two'))
+            yield open_simple_pane(StrIdent('three'))
             panes = yield all_panes().state
             positions = panes / _.position
             yield TS.from_maybe(positions.lift_all(0, 1, 2), 'invalid number of panes')

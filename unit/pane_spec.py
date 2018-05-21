@@ -13,7 +13,7 @@ from chiasma.util.id import StrIdent
 from chiasma.command import tmux_data_cmd, TmuxCmdData
 from chiasma.io.compute import TmuxIO
 
-from unit._support.data import SpecData, ui_open_pane, open_pane
+from unit._support.data import SpecData, ui_open_simple_pane, open_simple_pane
 
 
 class FData(Dat['FData']):
@@ -59,8 +59,8 @@ class PaneSpec(TmuxSpec):
         data = SpecData.cons(layout)
         @do(TS[SpecData, None])
         def go() -> Do:
-            yield ui_open_pane(StrIdent('one'))
-            yield open_pane(StrIdent('two'))
+            yield ui_open_simple_pane(StrIdent('one'))
+            yield open_simple_pane(StrIdent('two'))
             yield all_panes().state
             yield TS.lift(pdata())
         (s, r) = self.run(go(), data)

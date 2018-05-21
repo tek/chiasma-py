@@ -96,6 +96,9 @@ class SimpleUiPane(UiPane[SimplePane], tpe=SimplePane):
     def pin(self, a: SimplePane) -> bool:
         return a.pin
 
+    def set_open(self, a: SimplePane, state: Boolean) -> SimplePane:
+        return a.set.open(state)
+
 
 class SimpleUiLayout(UiLayout[SimpleLayout], tpe=SimpleLayout):
 

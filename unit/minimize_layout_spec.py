@@ -13,7 +13,7 @@ from chiasma.test.tmux_spec import TmuxSpec
 from chiasma.io.state import TS
 from chiasma.util.id import StrIdent
 
-from unit._support.data import SpecData, ui_open_pane, open_pane, simple_render
+from unit._support.data import SpecData, ui_open_simple_pane, open_simple_pane, simple_render
 from unit._support.layout import two_vertical, three
 
 
@@ -33,9 +33,9 @@ class MinimizeLayoutSpec(TmuxSpec):
         data = SpecData.cons(three)
         @do(TS[SpecData, None])
         def go() -> Do:
-            yield ui_open_pane(StrIdent('one'))
-            yield ui_open_pane(StrIdent('two'))
-            yield open_pane(StrIdent('three'))
+            yield ui_open_simple_pane(StrIdent('one'))
+            yield ui_open_simple_pane(StrIdent('two'))
+            yield open_simple_pane(StrIdent('three'))
             yield TS.modify(minimize_layout('sub'))
             yield simple_render()
             yield all_panes().state
@@ -46,8 +46,8 @@ class MinimizeLayoutSpec(TmuxSpec):
         data = SpecData.cons(two_vertical)
         @do(TS[SpecData, None])
         def go() -> Do:
-            yield ui_open_pane(StrIdent('one'))
-            yield ui_open_pane(StrIdent('two'))
+            yield ui_open_simple_pane(StrIdent('one'))
+            yield ui_open_simple_pane(StrIdent('two'))
             yield TS.modify(minimize_layout('right'))
             yield simple_render()
             yield all_panes().state

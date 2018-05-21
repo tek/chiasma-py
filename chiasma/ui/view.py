@@ -58,5 +58,9 @@ class UiPane(Generic[A], TypeClass):
     def pin(self, a: A) -> bool:
         ...
 
+    @abc.abstractmethod
+    def set_open(self, a: A, state: Boolean) -> A:
+        ...
+
 
 __all__ = ('UiWindow', 'UiView', 'UiLayout', 'UiPane')
