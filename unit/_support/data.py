@@ -19,13 +19,13 @@ from chiasma.commands.pane import PaneData
 class SpecData(Dat['SpecData']):
 
     @staticmethod
-    def cons(layout: ViewTree) -> 'SpecData':
-        tm = Views.cons(sessions=List(Session.cons('main', id=0)), windows=List(Window.cons('main', id=0)))
-        return SpecData(layout, tm)
+    def cons(layout: SimpleViewTree=None) -> 'SpecData':
+        views = Views.cons(sessions=List(Session.cons('main', id=0)), windows=List(Window.cons('main', id=0)))
+        return SpecData(layout or SimpleViewTree.layout(SimpleLayout.cons('root')), views)
 
-    def __init__(self, layout: ViewTree, tmux: Views) -> None:
+    def __init__(self, layout: SimpleViewTree, views: Views) -> None:
         self.layout = layout
-        self.tmux = tmux
+        self.views = views
 
 
 @do(TS[SpecData, None])

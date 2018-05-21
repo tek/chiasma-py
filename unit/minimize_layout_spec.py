@@ -3,37 +3,23 @@ from typing import Callable
 from kallikrein import k, Expectation
 
 from amino import List, do, Do
-from amino.boolean import true, false
+from amino.boolean import true
 from amino.lenses.lens import lens
 
 from chiasma.commands.pane import all_panes
-from chiasma.data.view_tree import ViewTree, map_layouts
-from chiasma.ui.simple import SimpleLayout, SimplePane, SimpleLayoutUiView
+from chiasma.data.view_tree import map_layouts
+from chiasma.ui.simple import has_ident
 from chiasma.test.tmux_spec import TmuxSpec
 from chiasma.io.state import TS
 from chiasma.util.id import StrIdent
 
 from unit._support.data import SpecData, ui_open_pane, open_pane, simple_render
-from unit._support.layout import two_vertical
-
-layout = ViewTree.layout(
-    SimpleLayout.cons('main', vertical=false),
-    List(
-        ViewTree.pane(SimplePane.cons('one')),
-        ViewTree.layout(
-            SimpleLayout.cons('sub', vertical=true),
-            List(
-                ViewTree.pane(SimplePane.cons('two')),
-                ViewTree.pane(SimplePane.cons('three')),
-            )
-        ),
-    )
-)
+from unit._support.layout import two_vertical, three
 
 
 def minimize_layout(name: str) -> Callable[[SpecData], SpecData]:
     return lens.layout.modify(
-        map_layouts(lambda a: SimpleLayoutUiView().has_ident(a, name), lens.state.minimized.set(true))
+        map_layouts(has_ident(name), lens.state.minimized.set(true))
     )
 
 
@@ -44,7 +30,7 @@ class MinimizeLayoutSpec(TmuxSpec):
     '''
 
     def minimize(self) -> Expectation:
-        data = SpecData.cons(layout)
+        data = SpecData.cons(three)
         @do(TS[SpecData, None])
         def go() -> Do:
             yield ui_open_pane(StrIdent('one'))
