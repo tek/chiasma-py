@@ -85,6 +85,12 @@ class TmuxIO(Generic[A], F[A], ADT['TmuxIO[A]'], implicits=True, auto=True, meta
     def read(cmd: str, *args: str) -> 'TmuxIO[A]':
         return TmuxRead(TmuxCmd(cmd, Lists.wrap(args)))
 
+    @staticmethod
+    @do(IO[Tuple['TmuxIO', A]])
+    def to_io(fa: 'TmuxIO[A]', tmux: Tmux) -> Do:
+        result = yield IO.delay(fa.run, tmux)
+        yield IO.from_either(result.to_either)
+
     @abc.abstractmethod
     def _flat_map(self, f: Callable[[A], 'TmuxIO[B]'], ts: Eval[str], fs: Eval[str]) -> 'TmuxIO[B]':
         ...
