@@ -1,7 +1,7 @@
 import abc
 from typing import TypeVar, Callable, Generic
 
-from amino import Either, IO, Maybe
+from amino import Either, IO, Maybe, do, Do
 from amino.state import tcs, StateT, State, EitherState
 from amino.func import CallByName
 from amino.tc.base import TypeClass, tc_prop
@@ -63,6 +63,12 @@ class TmuxIOState(Generic[S, A], StateT[TmuxIO, S, A], tpe=TmuxIO):
     def inspect_either(f: Callable[[S], Either[str, A]]) -> 'TmuxIOState[S, A]':
         frame = cframe()
         return TmuxIOState.inspect_f(lambda s: TmuxIO.from_either(f(s), frame))
+
+    @staticmethod
+    @do('TmuxIOState[S, A]')
+    def modify_e(f: Callable[[S], Either[str, S]]) -> Do:
+        new = yield TmuxIOState.inspect_either(f)
+        yield TmuxIOState.set(new)
 
     @staticmethod
     def read(cmd: str, *args: str) -> 'TmuxIOState[S, A]':
