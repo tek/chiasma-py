@@ -14,7 +14,7 @@ from chiasma.render import render
 from chiasma.io.state import TS
 from chiasma.util.id import Ident, StrIdent, IdentSpec
 from chiasma.commands.pane import PaneData
-from chiasma.open_pane import mod_pane, match_ident, ModPaneResult, FoundHere
+from chiasma.mod_pane import mod_pane, match_ident, ModPaneResult, FoundHere
 from chiasma.data.view_tree import SubUiNode, ViewTree
 
 

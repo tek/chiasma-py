@@ -2,10 +2,8 @@ from typing import Generic, TypeVar, Callable, Any
 
 from amino import ADT, List, Nil, Either, Right, Left, Boolean, Maybe, Nothing, __, _, do, Do, Dat
 
-from chiasma.ui.view import UiPane
 from chiasma.util.id import Ident
 from amino.case import Case
-from amino.tc.context import context
 
 
 A = TypeVar('A')

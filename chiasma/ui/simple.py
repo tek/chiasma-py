@@ -7,7 +7,7 @@ from chiasma.util.id import Ident, IdentSpec, ensure_ident
 from chiasma.ui.view_geometry import ViewGeometry
 from chiasma.ui.view import UiPane, UiLayout, UiView
 from chiasma.ui.state import ViewState
-from chiasma.data.view_tree import ViewTree
+from chiasma.data.view_tree import ViewTree, LayoutNode, PaneNode
 
 
 class SimpleView(ADT['SimpleView']):
@@ -54,6 +54,7 @@ class SimplePane(SimpleView):
             geometry: ViewGeometry=None,
             open: bool=False,
             cwd: Path=None,
+            pin: bool=False,
     ) -> 'SimplePane':
         return SimplePane(
             ensure_ident(ident),
@@ -61,6 +62,7 @@ class SimplePane(SimpleView):
             geometry or ViewGeometry.cons(),
             Boolean(open),
             Maybe.optional(cwd),
+            Boolean(pin),
         )
 
     def __init__(
@@ -70,10 +72,12 @@ class SimplePane(SimpleView):
             geometry: ViewGeometry,
             open: Boolean,
             cwd: Maybe[Path],
+            pin: Boolean,
     ) -> None:
         super().__init__(ident, state, geometry)
         self.open = open
         self.cwd = cwd
+        self.pin = pin
 
 
 class SimpleUiPane(UiPane[SimplePane], tpe=SimplePane):
@@ -88,6 +92,9 @@ class SimpleUiPane(UiPane[SimplePane], tpe=SimplePane):
 
     def cwd(self, a: SimplePane) -> Maybe[Path]:
         return a.cwd
+
+    def pin(self, a: SimplePane) -> bool:
+        return a.pin
 
 
 class SimpleUiLayout(UiLayout[SimpleLayout], tpe=SimpleLayout):
@@ -129,5 +136,8 @@ def has_ident(ident_spec: IdentSpec) -> Callable[[SimpleView], bool]:
 
 
 SimpleViewTree = ViewTree[SimpleLayout, SimplePane]
+SimpleLayoutNode = LayoutNode[SimpleLayout, SimplePane]
+SimplePaneNode = PaneNode[SimpleLayout, SimplePane]
 
-__all__ = ('SimpleView', 'SimpleLayout', 'SimplePane', 'has_ident', 'SimpleViewTree',)
+__all__ = ('SimpleView', 'SimpleLayout', 'SimplePane', 'has_ident', 'SimpleViewTree', 'SimpleLayoutNode',
+           'SimplePaneNode',)

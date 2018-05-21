@@ -54,5 +54,9 @@ class UiPane(Generic[A], TypeClass):
     def cwd(self, a: A) -> Maybe[Path]:
         ...
 
+    @abc.abstractmethod
+    def pin(self, a: A) -> bool:
+        ...
+
 
 __all__ = ('UiWindow', 'UiView', 'UiLayout', 'UiPane')
