@@ -3,7 +3,7 @@ from amino.util.numeric import parse_int
 from amino.logging import module_log
 
 from chiasma.io.compute import TmuxIO
-from chiasma.command import tmux_data_cmd, TmuxCmdData
+from chiasma.command import tmux_data_cmd, TmuxCmdData, simple_tmux_cmd_attr
 from chiasma.data.window import Window
 from chiasma.data.pane import Pane
 from chiasma.commands.window import window_id, parse_window_id
@@ -200,5 +200,12 @@ def pipe_pane(id: int, path: Path) -> TmuxIO[None]:
     return TmuxIO.write(*pane_cmd(id, 'pipe-pane', quote(f'{pipe_filter} > {str(path)}')))
 
 
+@do(TmuxIO[int])
+def pane_pid(id: int) -> Do:
+    p = yield pane(id)
+    return p.pid
+
+
 __all__ = ('all_panes', 'window_panes', 'pane', 'resize_pane', 'pane_open', 'create_pane_from_data', 'move_pane',
-           'close_pane', 'send_keys', 'capture_pane', 'window_pane', 'close_pane_id', 'pane_width', 'pane_height',)
+           'close_pane', 'send_keys', 'capture_pane', 'window_pane', 'close_pane_id', 'pane_width', 'pane_height',
+           'pane_pid',)
