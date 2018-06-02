@@ -5,7 +5,7 @@ from amino import Either, ADT, Right, Left, Dat, Nil, List
 from amino.func import const
 
 from chiasma.data.view_tree import ViewTree, LayoutNode, PaneNode, SubUiNode
-from chiasma.util.id import Ident, IdentSpec, ensure_ident
+from chiasma.util.id import Ident, IdentSpec, ensure_ident_or_generate
 
 L = TypeVar('L')
 P = TypeVar('P')
@@ -71,6 +71,9 @@ class LayoutModPaneState(Dat['LayoutModPaneState']):
         self.found = found
 
 
+# TODO generalize for layouts
+# could use the `layout` modder result like the on for panes
+# return Found only if `layout` returns `Right`, then it can be used by the parent layout like pane results
 class mod_pane_step(Generic[L, P], Case[ViewTree[L, P], ModPaneResult[L, P]], alg=ViewTree):
 
     def __init__(self, funcs: ModPaneFuncs) -> None:
@@ -135,7 +138,7 @@ def mod_pane(
 
 
 def match_ident(spec: IdentSpec) -> Callable[[ViewTree[L, P]], bool]:
-    ident = ensure_ident(spec)
+    ident = ensure_ident_or_generate(spec)
     def match_ident(tree: ViewTree[L, P]) -> bool:
         return tree.data.ident == ident
     return match_ident

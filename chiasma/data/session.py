@@ -1,6 +1,6 @@
 from amino import Dat, Maybe
 
-from chiasma.util.id import Ident, IdentSpec, ensure_ident
+from chiasma.util.id import Ident, IdentSpec, ensure_ident_or_generate
 
 
 class Session(Dat['Session']):
@@ -11,7 +11,7 @@ class Session(Dat['Session']):
             id: int=None,
     ) -> 'Session':
         return Session(
-            ensure_ident(ident),
+            ensure_ident_or_generate(ident),
             Maybe.check(id),
         )
 

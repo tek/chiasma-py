@@ -4,7 +4,7 @@ import abc
 from amino.tc.base import TypeClass
 from amino import Boolean, Maybe, Path
 
-from chiasma.util.id import Ident, IdentSpec, ensure_ident
+from chiasma.util.id import Ident, IdentSpec, ensure_ident_or_generate
 from chiasma.ui.state import ViewState
 from chiasma.ui.view_geometry import ViewGeometry
 
@@ -33,7 +33,7 @@ class UiView(Generic[A], TypeClass):
         ...
 
     def has_ident(self, a: A, ident: IdentSpec) -> bool:
-        return self.ident(a) == ensure_ident(ident)
+        return self.ident(a) == ensure_ident_or_generate(ident)
 
 
 class UiLayout(Generic[A], TypeClass):

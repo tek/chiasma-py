@@ -3,7 +3,7 @@ from typing import Callable
 from amino import Boolean, ADT, Maybe, Path
 from amino.tc.base import tc_prop
 
-from chiasma.util.id import Ident, IdentSpec, ensure_ident
+from chiasma.util.id import Ident, IdentSpec, ensure_ident_or_generate
 from chiasma.ui.view_geometry import ViewGeometry
 from chiasma.ui.view import UiPane, UiLayout, UiView
 from chiasma.ui.state import ViewState
@@ -28,7 +28,7 @@ class SimpleLayout(SimpleView):
             vertical: bool=True,
     ) -> 'SimpleLayout':
         return SimpleLayout(
-            ensure_ident(ident),
+            ensure_ident_or_generate(ident),
             state or ViewState.cons(),
             geometry or ViewGeometry.cons(),
             Boolean(vertical),
@@ -57,7 +57,7 @@ class SimplePane(SimpleView):
             pin: bool=False,
     ) -> 'SimplePane':
         return SimplePane(
-            ensure_ident(ident),
+            ensure_ident_or_generate(ident),
             state or ViewState.cons(),
             geometry or ViewGeometry.cons(),
             Boolean(open),
@@ -132,7 +132,7 @@ class SimpleLayoutUiView(UiView[SimpleLayout], tpe=SimpleLayout):
 
 
 def has_ident(ident_spec: IdentSpec) -> Callable[[SimpleView], bool]:
-    ident = ensure_ident(ident_spec)
+    ident = ensure_ident_or_generate(ident_spec)
     def has_ident(view: SimpleView) -> bool:
         return view.ident == ident
     return has_ident

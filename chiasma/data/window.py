@@ -1,6 +1,6 @@
 from amino import Dat, Maybe
 
-from chiasma.util.id import Ident, IdentSpec, ensure_ident
+from chiasma.util.id import Ident, IdentSpec, ensure_ident_or_generate
 
 
 class Window(Dat['Window']):
@@ -11,7 +11,7 @@ class Window(Dat['Window']):
             id: int=None,
     ) -> 'Window':
         return Window(
-            ensure_ident(ident),
+            ensure_ident_or_generate(ident),
             Maybe.check(id),
         )
 

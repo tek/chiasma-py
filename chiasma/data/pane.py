@@ -1,6 +1,6 @@
 from amino import Dat, Maybe
 
-from chiasma.util.id import Ident, IdentSpec, ensure_ident
+from chiasma.util.id import Ident, IdentSpec, ensure_ident_or_generate
 
 
 class Pane(Dat['Pane']):
@@ -11,7 +11,7 @@ class Pane(Dat['Pane']):
             id: int=None,
     ) -> 'Pane':
         return Pane(
-            ensure_ident(ident),
+            ensure_ident_or_generate(ident),
             Maybe.check(id),
         )
 

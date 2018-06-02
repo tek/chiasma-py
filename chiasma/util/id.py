@@ -3,7 +3,7 @@ import abc
 from uuid import UUID, uuid4
 from typing import TypeVar, Generic, Any, Type, Union
 
-from amino import Dat
+from amino import Dat, Right, Left
 from amino import ADT, Either, List
 from amino.json.decoder import Decoder, decode_json_type_json
 from amino.json.data import JsonError, Json
@@ -81,18 +81,23 @@ class IdentDecoder(Decoder, tpe=Ident):
 IdentSpec = Union[Ident, str, UUID, Key, None]
 
 
-def ensure_ident(spec: IdentSpec) -> Ident:
+def ensure_ident(spec: IdentSpec) -> Either[str, Ident]:
     return (
-        spec
+        Right(spec)
         if isinstance(spec, Ident) else
-        UUIDIdent(spec)
+        Right(UUIDIdent(spec))
         if isinstance(spec, UUID) else
-        StrIdent(spec)
+        Right(StrIdent(spec))
         if isinstance(spec, str) else
-        KeyIdent(spec)
+        Right(KeyIdent(spec))
         if isinstance(spec, Key) else
-        Ident.generate()
+        Left(f'invalid ident spec: {spec}')
     )
 
 
-__all__ = ('Ident', 'Key', 'StrIdent', 'UUIDIdent', 'KeyIdent', 'IdentSpec', 'ensure_ident')
+def ensure_ident_or_generate(spec: IdentSpec) -> Ident:
+    return ensure_ident(spec).get_or(Ident.generate)
+
+
+__all__ = ('Ident', 'Key', 'StrIdent', 'UUIDIdent', 'KeyIdent', 'IdentSpec', 'ensure_ident',
+           'ensure_ident_or_generate',)
