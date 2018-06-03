@@ -1,4 +1,5 @@
 import abc
+import time
 import inspect
 from traceback import FrameSummary
 from typing import TypeVar, Callable, Any, Generic, Union, Tuple
@@ -90,6 +91,14 @@ class TmuxIO(Generic[A], F[A], ADT['TmuxIO[A]'], implicits=True, auto=True, meta
     def to_io(fa: 'TmuxIO[A]', tmux: Tmux) -> Do:
         result = yield IO.delay(fa.run, tmux)
         yield IO.from_either(result.to_either)
+
+    @staticmethod
+    def sleep(duration: float) -> 'TmuxIO[None]':
+        return TmuxIO.delay(lambda v: time.sleep(duration))
+
+    @staticmethod
+    def flush() -> 'TmuxIO[None]':
+        return TmuxIO.read('list-clients').void
 
     @abc.abstractmethod
     def _flat_map(self, f: Callable[[A], 'TmuxIO[B]'], ts: Eval[str], fs: Eval[str]) -> 'TmuxIO[B]':
