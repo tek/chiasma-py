@@ -3,7 +3,7 @@ import abc
 from uuid import UUID, uuid4
 from typing import TypeVar, Generic, Any, Type, Union
 
-from amino import Dat, Right, Left
+from amino import Dat, Right, Left, Maybe, Nothing
 from amino import ADT, Either, List
 from amino.json.decoder import Decoder, decode_json_type_json
 from amino.json.data import JsonError, Json
@@ -95,9 +95,13 @@ def ensure_ident(spec: IdentSpec) -> Either[str, Ident]:
     )
 
 
+def optional_ident(spec: IdentSpec) -> Either[str, Maybe[Ident]]:
+    return Maybe.optional(spec).cata(ensure_ident, Right(Nothing))
+
+
 def ensure_ident_or_generate(spec: IdentSpec) -> Ident:
     return ensure_ident(spec).get_or(Ident.generate)
 
 
-__all__ = ('Ident', 'Key', 'StrIdent', 'UUIDIdent', 'KeyIdent', 'IdentSpec', 'ensure_ident',
+__all__ = ('Ident', 'Key', 'StrIdent', 'UUIDIdent', 'KeyIdent', 'IdentSpec', 'ensure_ident', 'optional_ident',
            'ensure_ident_or_generate',)
