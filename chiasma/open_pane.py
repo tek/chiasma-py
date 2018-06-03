@@ -21,7 +21,11 @@ class open_pinned_pane(Case[ViewTree[L, P], ViewTree[L, P]], alg=ViewTree):
         return a
 
     def pane(self, a: PaneNode[L, P]) -> ViewTree[L, P]:
-        return lens.data.modify(lambda p: UiPane.fatal_for(p).set_open(p, true))(a)
+        return (
+            lens.data.modify(lambda p: UiPane.fatal_for(p).set_open(p, true))(a)
+            if a.data.pin else
+            a
+        )
 
     def sub_ui(self, a: SubUiNode) -> ViewTree[L, P]:
         return a
