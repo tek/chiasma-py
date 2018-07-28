@@ -249,7 +249,7 @@ def distribute_on_all(data: Balance) -> List[Number]:
 
 
 def has_unbounded(data: Balance) -> Boolean:
-    return data.max.contains(lambda a: not a.present)
+    return data.max.exists(lambda a: not a.present)
 
 
 def distribute_sizes(data: Balance) -> List[Number]:

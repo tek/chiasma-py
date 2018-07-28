@@ -155,7 +155,7 @@ def create_pane_from_data(window: Window, pane: Pane, dir: Path) -> Do:
 @do(TmuxIO[Boolean])
 def pane_open(id: int) -> Do:
     ps = yield all_panes()
-    return ps.contains(_.id == id)
+    return ps.exists(_.id == id)
 
 
 def resize_pane(id: int, vertical: Boolean, size: int) -> TmuxIO[None]:
