@@ -212,6 +212,10 @@ def pane_pid(id: int) -> Do:
     return p.pid
 
 
+def select_pane(id: int) -> TmuxIO[int]:
+    return TmuxIO.write(*pane_cmd(id, 'select-pane'))
+
+
 __all__ = ('all_panes', 'window_panes', 'pane', 'resize_pane', 'pane_open', 'create_pane_from_data', 'move_pane',
            'close_pane', 'send_keys', 'capture_pane', 'window_pane', 'close_pane_id', 'pane_width', 'pane_height',
-           'pane_pid', 'window_pane_open',)
+           'pane_pid', 'window_pane_open', 'select_pane',)
