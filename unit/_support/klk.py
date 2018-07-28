@@ -38,7 +38,14 @@ class TestConfig(Dat['TestConfig']):
             socket,
         )
 
-    def __init__(self, layout: SimpleViewTree, win_width: int, win_height: int, terminal: bool, socket: str) -> None:
+    def __init__(
+            self,
+            layout: SimpleViewTree,
+            win_width: int,
+            win_height: int,
+            terminal: bool,
+            socket: str,
+    ) -> None:
         self.layout = layout
         self.win_width = win_width
         self.win_height = win_height
