@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version_parts = (0, 1, 0, 'a', 26)
+version_parts = (0, 1, 0, 'a', 27)
 version = '.'.join(map(str, version_parts))
 
 setup(
@@ -13,7 +13,7 @@ setup(
     url='https://github.com/tek/chiasma',
     packages=find_packages(exclude=['unit', 'unit.*', 'integration', 'integration.*']),
     install_requires=[
-        'amino==13.0.0a28',
+        'amino~=13.0.1a4',
         'psutil==5.3.1',
     ],
     tests_require=[
