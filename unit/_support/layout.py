@@ -13,7 +13,7 @@ three = ViewTree.layout(
         ViewTree.layout(
             SimpleLayout.cons('sub', vertical=True),
             List(
-                ViewTree.pane(SimplePane.cons('two')),
+                ViewTree.pane(SimplePane.cons('two', pin=True)),
                 ViewTree.pane(SimplePane.cons('three')),
             )
         ),
