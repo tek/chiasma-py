@@ -35,4 +35,5 @@ def tmuxio_repeat_timeout(
         )
     yield recurse()
 
+
 __all__ = ('tmuxio_repeat_timeout',)

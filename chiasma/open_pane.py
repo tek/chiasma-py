@@ -1,6 +1,6 @@
-from typing import Tuple, Callable, TypeVar
+from typing import Callable, TypeVar
 
-from amino import List, do, Do, Dat, _, Either, Right, Left, Boolean
+from amino import List, Either, Right, Left
 
 from amino.lenses.lens import lens
 from amino.boolean import true

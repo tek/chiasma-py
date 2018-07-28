@@ -60,7 +60,7 @@ class reference_node(Case, alg=ViewTree):
         return Left('SubUiNode')
 
 
-class find_in_view_tree(Generic[L, P], Case, alg=ViewTree):
+class find_in_view_tree(Generic[A, L, P], Case[ViewTree[L, P], Maybe[A]], alg=ViewTree):
 
     def __init__(
             self,
