@@ -239,5 +239,10 @@ class pack_window(Case, alg=WindowState):
         yield pack_tree(self.session, self.window, self.principal)(measure_tree, ref)
 
 
+def window_by_ident(ident: Ident) -> TS[Views, Window]:
+    return TS.inspect_either(lambda a: a.window_by_ident(ident))
+
+
 __all__ = ('add_window', 'find_or_create_window', 'create_tmux_window', 'ensure_window', 'ensure_view', 'position_view',
-           'resize_view', 'pack_tree', 'WindowState', 'PristineWindow', 'TrackedWindow', 'window_state', 'pack_window')
+           'resize_view', 'pack_tree', 'WindowState', 'PristineWindow', 'TrackedWindow', 'window_state', 'pack_window',
+           'window_by_ident',)
