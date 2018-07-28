@@ -158,6 +158,12 @@ def pane_open(id: int) -> Do:
     return ps.exists(_.id == id)
 
 
+@do(TmuxIO[Boolean])
+def window_pane_open(wid: int, id: int) -> Do:
+    ps = yield window_panes(wid)
+    return ps.exists(_.id == id)
+
+
 def resize_pane(id: int, vertical: Boolean, size: int) -> TmuxIO[None]:
     direction = '-y' if vertical else '-x'
     return TmuxIO.write('resize-pane', '-t', pane_id(id), direction, size)
@@ -208,4 +214,4 @@ def pane_pid(id: int) -> Do:
 
 __all__ = ('all_panes', 'window_panes', 'pane', 'resize_pane', 'pane_open', 'create_pane_from_data', 'move_pane',
            'close_pane', 'send_keys', 'capture_pane', 'window_pane', 'close_pane_id', 'pane_width', 'pane_height',
-           'pane_pid',)
+           'pane_pid', 'window_pane_open',)
