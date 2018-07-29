@@ -1,3 +1,3 @@
+from chiasma.io.tc import TmuxIOMonad
 
-
-__all__ = ()
+__all__ = ('TmuxIOMonad',)

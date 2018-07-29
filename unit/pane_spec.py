@@ -45,10 +45,10 @@ def pdata() -> TmuxIO[List[FData]]:
 
 class PaneSpec(TmuxSpec):
     '''
-    test $test
+    open two panes, keep focus on the first $focus
     '''
 
-    def test(self) -> Expectation:
+    def focus(self) -> Expectation:
         layout = ViewTree.layout(
             SimpleLayout.cons('main', vertical=true),
             List(
